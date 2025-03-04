@@ -1,0 +1,32 @@
+{
+  "name": "grade1-math-app",
+  "version": "1.0.0",
+  "description": "A math practice application for Grade 1 students",
+  "main": "index.html",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "format": "prettier --write \"**/*.{js,html,css}\"",
+    "lint": "eslint \"**/*.js\"",
+    "lint:fix": "eslint \"**/*.js\" --fix",
+    "start": "serve ."
+  },
+  "keywords": [
+    "education",
+    "math",
+    "children",
+    "elementary"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/preset-env": "^7.22.5",
+    "eslint": "^8.42.0",
+    "eslint-config-prettier": "^8.8.0",
+    "jest": "^29.5.0",
+    "jest-environment-jsdom": "^29.5.0",
+    "prettier": "^2.8.8",
+    "serve": "^14.2.0"
+  }
+}

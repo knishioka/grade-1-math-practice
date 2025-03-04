@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade 1 Math App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Grade 1 Math Practice</h1>
+        <div class="timer-container">
+            <div id="timer">3:00</div>
+            <button id="start-btn">Start</button>
+            <div class="current-mode-display">
+                <span id="current-difficulty-display">Easy</span>
+                <span id="current-mode-display">Addition</span>
+            </div>
+        </div>
+        <div class="score-container">
+            <div>Score: <span id="score">0</span></div>
+            <div>Incorrect: <span id="incorrect">0</span></div>
+        </div>
+        <div class="problem-container">
+            <div id="problem"></div>
+            <div class="answer-container">
+                <input type="number" id="answer" autofocus>
+                <button id="check">Check</button>
+            </div>
+            <div class="number-pad">
+                <button class="num-btn">1</button>
+                <button class="num-btn">2</button>
+                <button class="num-btn">3</button>
+                <button class="num-btn">4</button>
+                <button class="num-btn">5</button>
+                <button class="num-btn">6</button>
+                <button class="num-btn">7</button>
+                <button class="num-btn">8</button>
+                <button class="num-btn">9</button>
+                <button class="num-btn">0</button>
+                <button id="clear-btn">Clear</button>
+            </div>
+        </div>
+        <div class="message" id="message"></div>
+        <div class="buttons">
+            <button id="addition" class="operation-btn active">Addition</button>
+            <button id="subtraction" class="operation-btn inactive">Subtraction</button>
+            <button id="mixed" class="operation-btn inactive">Mixed</button>
+            <button id="counting" class="operation-btn inactive">Counting</button>
+        </div>
+        <div class="difficulty-container">
+            <p>Select Difficulty Level:</p>
+            <div class="difficulty-buttons">
+                <button id="easy" class="difficulty-btn active">Easy</button>
+                <button id="medium" class="difficulty-btn">Medium</button>
+                <button id="hard" class="difficulty-btn">Hard</button>
+                <button id="mixed-difficulty" class="difficulty-btn">Mixed</button>
+            </div>
+            <div id="difficulty-locked-message" class="hidden">Difficulty locked during game</div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
