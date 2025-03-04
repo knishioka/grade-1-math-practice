@@ -1,5 +1,5 @@
 body {
-  font-family: 'Comic Sans MS', cursive, sans-serif;
+  font-family: 'Arial', 'Helvetica', sans-serif;
   background-color: #f0f8ff;
   margin: 0;
   padding: 0;
@@ -18,6 +18,8 @@ body {
 h1 {
   color: #ff6b6b;
   margin-bottom: 10px;
+  font-weight: bold;
+  font-family: 'Arial', 'Helvetica', sans-serif;
 }
 
 .timer-container {
@@ -115,6 +117,7 @@ h1 {
 
 .score-container {
   font-size: 20px;
+  font-weight: bold;
   margin-bottom: 20px;
   display: flex;
   justify-content: center;
@@ -154,7 +157,7 @@ h1 {
 .waiting-message {
   color: #7f8c8d;
   font-size: 24px;
-  font-style: italic;
+  font-weight: bold;
   margin: 30px 0;
 }
 
@@ -164,16 +167,18 @@ h1 {
   gap: 10px;
 }
 
-input {
+#answer-display {
   padding: 10px;
   font-size: 28px;
   font-weight: bold;
   border: 2px solid #dfe4ea;
   border-radius: 6px;
   width: 120px;
+  min-height: 40px;
   text-align: center;
   color: #2d3436;
   background-color: #f8f9fa;
+  display: inline-block;
 }
 
 button {
@@ -359,7 +364,7 @@ button:disabled {
   margin-top: 8px;
   color: #e84393;
   font-size: 14px;
-  font-style: italic;
+  font-weight: bold;
 }
 
 #mode-locked-message {
@@ -427,16 +432,17 @@ button:disabled {
 .number-pad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin: 15px auto;
-  max-width: 250px;
+  gap: 12px;
+  margin: 20px auto;
+  max-width: 300px;
 }
 
 .num-btn {
-  font-size: 20px;
-  padding: 10px;
+  font-size: 28px;
+  padding: 15px;
   background-color: #5f27cd;
-  border-radius: 8px;
+  border-radius: 12px;
+  min-height: 70px;
 }
 
 .num-btn:hover {
@@ -446,6 +452,8 @@ button:disabled {
 #clear-btn {
   grid-column: span 3;
   background-color: #ff6b6b;
+  font-size: 24px;
+  min-height: 70px;
 }
 
 #clear-btn:hover {

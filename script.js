@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const elements = {
     // Problem and answer elements
     problem: document.getElementById('problem'),
-    answer: document.getElementById('answer'),
+    answerDisplay: document.getElementById('answer-display'),
     check: document.getElementById('check'),
     message: document.getElementById('message'),
     score: document.getElementById('score'),
@@ -208,17 +208,11 @@ document.addEventListener('DOMContentLoaded', function () {
       button.addEventListener('click', handleDifficultyButtonClick);
     });
 
-    // Number input
-    elements.answer.addEventListener('keypress', e => {
-      if (e.key === 'Enter') checkAnswer();
-    });
-    elements.answer.addEventListener('input', checkInputValue);
-
     // Number pad
     elements.numberButtons.forEach(button => {
       button.addEventListener('click', () => {
-        elements.answer.value += button.textContent;
-        elements.answer.focus();
+        const currentAnswer = elements.answerDisplay.textContent || '';
+        elements.answerDisplay.textContent = currentAnswer + button.textContent;
         checkInputValue();
       });
     });
@@ -226,8 +220,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Clear button
     if (elements.clearButton) {
       elements.clearButton.addEventListener('click', () => {
-        elements.answer.value = '';
-        elements.answer.focus();
+        elements.answerDisplay.textContent = '';
         checkInputValue();
       });
     }
@@ -243,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // 3. Ensure consistent problem object structure
   function newProblem() {
     // Reset input and messages
-    elements.answer.value = '';
+    elements.answerDisplay.textContent = '';
     elements.message.textContent = '';
     elements.message.className = 'message';
     gameState.currentProblemAttempts = 0;
@@ -260,9 +253,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Generate problem based on game mode
     generateProblemByMode(activeDifficulty);
 
-    // Display problem and focus on answer input
+    // Display problem
     elements.problem.innerHTML = gameState.currentProblem.question;
-    elements.answer.focus();
   }
 
   function generateProblemByMode(activeDifficulty) {
@@ -339,7 +331,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Handles both correct and incorrect responses
   // To add new response behaviors, modify these functions
   function checkAnswer() {
-    const userAnswer = parseInt(elements.answer.value);
+    const userAnswer = parseInt(elements.answerDisplay.textContent);
 
     if (isNaN(userAnswer)) {
       elements.message.textContent = 'Please enter a number!';
@@ -377,7 +369,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Clear the input to make it more obvious it was incorrect
-    elements.answer.value = '';
+    elements.answerDisplay.textContent = '';
     elements.check.disabled = true;
 
     // Show different messages based on number of attempts
@@ -395,9 +387,6 @@ document.addEventListener('DOMContentLoaded', function () {
         elements.problem.classList.remove('shake-animation');
       }, 500);
     }
-
-    // Focus back on input field after clearing
-    elements.answer.focus();
   }
 
   // ===================================
@@ -459,7 +448,7 @@ document.addEventListener('DOMContentLoaded', function () {
     elements.problem.innerHTML = '<p class="waiting-message">Press Start to begin</p>';
     elements.message.textContent = '';
     elements.message.className = 'message';
-    elements.answer.value = '';
+    elements.answerDisplay.textContent = '';
 
     // Reset button state
     elements.startBtn.textContent = 'Start';
@@ -649,13 +638,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function checkInputValue() {
     // Enable/disable check button based on input
-    elements.check.disabled = !elements.answer.value;
+    elements.check.disabled = !elements.answerDisplay.textContent;
 
     // Update the problem display to show entered number
     if (gameState.currentProblem.question && gameState.gameActive) {
       const questionParts = gameState.currentProblem.originalQuestion.split('?');
       if (questionParts.length === 2) {
-        const displayValue = elements.answer.value || '?';
+        const displayValue = elements.answerDisplay.textContent || '?';
         elements.problem.innerHTML = questionParts[0] + displayValue + questionParts[1];
       }
     }
@@ -677,8 +666,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function setControlsEnabled(enabled) {
-    // Set input fields
-    elements.answer.disabled = !enabled;
+    // Set check button
     elements.check.disabled = true; // Always start disabled until input
 
     // Set number buttons
