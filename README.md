@@ -2,8 +2,6 @@
 
 A fun and interactive math application designed specifically for Grade 1 elementary students. This app helps young learners practice basic arithmetic skills in a colorful, engaging environment.
 
-![Math Practice App for Kids](https://github.com/knishioka/grade1-math-app/raw/main/screenshots/app-preview.png)
-
 ## 🌟 Features
 
 - **Multiple Operation Types**:
