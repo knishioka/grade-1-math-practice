@@ -35,7 +35,7 @@ export function formatTime(seconds) {
   if (seconds < 0) {
     return '0:00';
   }
-  
+
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
@@ -50,7 +50,7 @@ export function formatTime(seconds) {
  */
 export function debounce(func, delay) {
   let timeoutId;
-  return function(...args) {
+  return function (...args) {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => {
       func.apply(this, args);

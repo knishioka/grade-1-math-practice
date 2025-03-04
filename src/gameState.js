@@ -17,7 +17,7 @@ export function initGameState() {
     currentProblemAttempts: 0,
     timeLeft: 180, // 3 minutes in seconds
     gameActive: false,
-    incorrectProblems: []
+    incorrectProblems: [],
   };
 }
 
@@ -36,7 +36,7 @@ export function resetGameState(state) {
     timeLeft: 180,
     gameActive: true,
     incorrectProblems: [],
-    currentProblem: {}
+    currentProblem: {},
   };
 }
 
@@ -49,7 +49,7 @@ export function resetGameState(state) {
 export function updateScore(state, increment = 1) {
   return {
     ...state,
-    score: state.score + increment
+    score: state.score + increment,
   };
 }
 
@@ -64,7 +64,7 @@ export function recordIncorrectProblem(state, problem) {
     ...state,
     incorrectAttempts: state.incorrectAttempts + 1,
     currentProblemAttempts: state.currentProblemAttempts + 1,
-    incorrectProblems: [...state.incorrectProblems, problem]
+    incorrectProblems: [...state.incorrectProblems, problem],
   };
 }
 
@@ -76,7 +76,7 @@ export function recordIncorrectProblem(state, problem) {
 export function getUniqueIncorrectProblems(state) {
   const seen = new Set();
   const uniqueProblems = [];
-  
+
   for (const problem of state.incorrectProblems) {
     const key = problem.question + problem.answer;
     if (!seen.has(key)) {
@@ -84,7 +84,7 @@ export function getUniqueIncorrectProblems(state) {
       uniqueProblems.push(problem);
     }
   }
-  
+
   return uniqueProblems;
 }
 
@@ -96,7 +96,7 @@ export function getUniqueIncorrectProblems(state) {
 export function calculateAccuracy(state) {
   const totalAttempts = state.score + state.incorrectAttempts;
   if (totalAttempts === 0) return 0;
-  
+
   return Math.round((state.score / totalAttempts) * 100);
 }
 
@@ -119,7 +119,7 @@ export function hasReachedMaxAttempts(state, maxAttempts = 3) {
 export function updateGameMode(state, mode) {
   return {
     ...state,
-    gameMode: mode
+    gameMode: mode,
   };
 }
 
@@ -132,6 +132,6 @@ export function updateGameMode(state, mode) {
 export function updateDifficulty(state, difficulty) {
   return {
     ...state,
-    difficulty
+    difficulty,
   };
 }

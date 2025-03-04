@@ -4,18 +4,14 @@
  */
 
 // Import utility functions for testing
-import { 
-  getRandomNumber, 
-  getRandomDifficulty,
-  formatTime
-} from '../src/utils';
+import { getRandomNumber, getRandomDifficulty, formatTime } from '../src/utils';
 
 describe('Utility Functions', () => {
   describe('getRandomNumber', () => {
     test('returns a number within the specified range', () => {
       const min = 1;
       const max = 10;
-      
+
       // Test multiple times to account for randomness
       for (let i = 0; i < 100; i++) {
         const result = getRandomNumber(min, max);
@@ -27,7 +23,7 @@ describe('Utility Functions', () => {
       const result = getRandomNumber(5, 5);
       expect(result).toBe(5);
     });
-    
+
     test('returns integers only', () => {
       const result = getRandomNumber(1, 10);
       expect(Number.isInteger(result)).toBe(true);
@@ -37,7 +33,7 @@ describe('Utility Functions', () => {
   describe('getRandomDifficulty', () => {
     test('returns either medium or hard', () => {
       const validDifficulties = ['medium', 'hard'];
-      
+
       // Test multiple times to account for randomness
       for (let i = 0; i < 100; i++) {
         const result = getRandomDifficulty();
@@ -45,7 +41,7 @@ describe('Utility Functions', () => {
       }
     });
   });
-  
+
   describe('formatTime', () => {
     test('formats seconds to MM:SS format', () => {
       expect(formatTime(0)).toBe('0:00');
