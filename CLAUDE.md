@@ -19,3 +19,6 @@
 - **Modules**: ES modules with named exports/imports
 - **Testing**: Jest/JSDOM, describe/test blocks, descriptive titles
 - **Components**: Modular design with single responsibility principle
+
+## Git Workflow
+- Pre-commit hooks automatically run prettier and ESLint on staged files

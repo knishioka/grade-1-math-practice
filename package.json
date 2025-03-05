@@ -10,7 +10,17 @@
     "format": "prettier --write \"**/*.{js,html,css}\"",
     "lint": "eslint \"**/*.js\"",
     "lint:fix": "eslint \"**/*.js\" --fix",
-    "start": "serve ."
+    "start": "serve .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "**/*.js": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "**/*.{html,css}": [
+      "prettier --write"
+    ]
   },
   "keywords": [
     "education",
@@ -24,8 +34,10 @@
     "@babel/preset-env": "^7.22.5",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^8.8.0",
+    "husky": "^9.1.7",
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
+    "lint-staged": "^15.4.3",
     "prettier": "^2.8.8",
     "serve": "^14.2.0"
   }
