@@ -289,6 +289,9 @@ document.addEventListener('DOMContentLoaded', function () {
       gameState.gameActive = true;
     }
     
+    // Log current game mode again before generating problem
+    console.log('Current gameMode in newProblem:', gameState.gameMode, 'active button:', document.querySelector('.operation-btn.active')?.id);
+    
     // Reset input and messages
     elements.answerDisplay.textContent = '';
     elements.message.textContent = '';
@@ -389,10 +392,16 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('Current gameMode before start:', gameState.gameMode);
     console.log('Active operation button:', document.querySelector('.operation-btn.active')?.id);
     
+    // Save current mode and difficulty
+    const currentMode = gameState.gameMode;
+    const currentDifficulty = gameState.difficulty;
+    console.log('Saved mode before reset:', currentMode);
+
     // Initialize a fresh game state and manually set gameActive
     // Don't use resetGameState for now to eliminate any potential issues
     gameState = {
-      ...gameState,
+      gameMode: currentMode, // Explicitly preserve the current mode
+      difficulty: currentDifficulty, // Explicitly preserve the current difficulty
       score: 0,
       incorrectAttempts: 0,
       currentProblemAttempts: 0,
