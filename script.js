@@ -161,6 +161,11 @@ document.addEventListener('DOMContentLoaded', function () {
       medium: { min1: 10, max1: 20, min2: 1, max2: 10 },
       hard: { min1: 20, max1: 100, min2: 1, max2: 20 },
     },
+    threeNumber: {
+      easy: { min1: 1, max1: 10, min2: 1, max2: 5, min3: 1, max3: 5 },
+      medium: { min1: 5, max1: 15, min2: 1, max2: 10, min3: 1, max3: 10 },
+      hard: { min1: 10, max1: 25, min2: 5, max2: 15, min3: 5, max3: 15 },
+    },
     mixed: {
       easy: { min1: 1, max1: 10, min2: 1, max2: 10 },
       medium: { min1: 1, max1: 20, min2: 1, max2: 20 },
