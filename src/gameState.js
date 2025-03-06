@@ -3,6 +3,8 @@
  * Functions for manipulating the core game state
  */
 
+// No imports needed for this module
+
 /**
  * Initialize a new game state with default values
  * @return {Object} New game state

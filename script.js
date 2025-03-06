@@ -57,7 +57,7 @@ import {
   updateGameMode, 
   updateDifficulty,
   hasReachedMaxAttempts 
-} from './src/gameState.js';
+} from '/src/gameState.js';
 
 import { 
   generateProblemByMode, 
@@ -65,12 +65,12 @@ import {
   generateThreeNumberProblem, // <-- Add direct import for three number problems
   generateAdditionProblem,
   generateSubtractionProblem
-} from './src/problemGenerator.js';
+} from '/src/problemGenerator.js';
 
 import { 
   getRandomDifficulty,
   formatTime
-} from './src/utils.js';
+} from '/src/utils.js';
 
 // グローバル関数としてゲーム開始関数を定義
 window.gameStart = function() {

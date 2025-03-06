@@ -3,7 +3,7 @@
  * Functions for generating math problems with different operations and difficulties
  */
 
-import { getRandomNumber } from './utils';
+import { getRandomNumber } from '/src/utils.js';
 
 // Emoji array moved to a constant to avoid duplication
 const EMOJIS = ['🍎', '🍕', '🐶', '🐱', '🦄', '🍦', '🚗', '🌈', '⭐'];
