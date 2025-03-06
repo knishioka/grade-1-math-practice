@@ -52,10 +52,30 @@ export function generateSubtractionProblem(difficulty, difficultySettings) {
  * @return {Object} Problem object with question and answer
  */
 export function generateThreeNumberProblem(difficulty, difficultySettings) {
+  console.log('generateThreeNumberProblem called with difficulty:', difficulty);
+  console.log('Available difficulty settings:', Object.keys(difficultySettings));
+  
+  // Check if threeNumber settings exist in difficultySettings
+  if (!difficultySettings.threeNumber) {
+    console.error('ERROR: threeNumber settings not found in difficultySettings:', difficultySettings);
+    // Fallback to addition if settings are missing
+    return generateAdditionProblem(difficulty, difficultySettings);
+  }
+  
   const settings = difficultySettings.threeNumber[difficulty];
+  console.log('Using threeNumber settings:', settings);
+  
+  if (!settings) {
+    console.error(`ERROR: No settings found for difficulty '${difficulty}' in threeNumber mode`);
+    // Fallback to addition if settings are missing
+    return generateAdditionProblem(difficulty, difficultySettings);
+  }
+  
   const num1 = getRandomNumber(settings.min1, settings.max1);
   const num2 = getRandomNumber(settings.min2, settings.max2);
   const num3 = getRandomNumber(settings.min3, settings.max3);
+  
+  console.log(`Generated numbers: ${num1}, ${num2}, ${num3}`);
   
   // Randomly choose problem type:
   // 1. a + b + c
@@ -64,6 +84,7 @@ export function generateThreeNumberProblem(difficulty, difficultySettings) {
   // Exclude a - b - c because it might result in negative numbers more easily
   
   const problemType = getRandomNumber(1, 3);
+  console.log('Selected problem type:', problemType);
   
   let question, answer;
   
@@ -102,11 +123,15 @@ export function generateThreeNumberProblem(difficulty, difficultySettings) {
       break;
   }
   
-  return {
+  const result = {
     originalQuestion: question,
     question: question,
-    answer: answer
+    answer: answer,
+    type: 'threeNumber' // Add a type marker to identify this as a three-number problem
   };
+  
+  console.log('Generated three-number problem:', result);
+  return result;
 }
 
 /**
@@ -158,34 +183,52 @@ export function generateProblemByMode(
     threeNumber: generateThreeNumberProblem
   }
 ) {
+  console.log('generateProblemByMode called with mode:', gameMode, 'and difficulty:', difficulty);
+  
+  let problem;
+  
   switch (gameMode) {
     case 'addition':
-      return generators.addition(difficulty, difficultySettings);
+      problem = generators.addition(difficulty, difficultySettings);
+      break;
 
     case 'subtraction':
-      return generators.subtraction(difficulty, difficultySettings);
+      problem = generators.subtraction(difficulty, difficultySettings);
+      break;
 
     case 'threeNumber':
-      return generators.threeNumber(difficulty, difficultySettings);
+      console.log('Explicitly generating a threeNumber problem');
+      problem = generators.threeNumber(difficulty, difficultySettings);
+      break;
 
     case 'mixed':
       // Randomly choose between addition, subtraction, and threeNumber
       const randomValue = Math.random();
+      console.log('Mixed mode random value:', randomValue);
       if (randomValue < 0.33) {
-        return generators.addition(difficulty, difficultySettings);
+        problem = generators.addition(difficulty, difficultySettings);
       } else if (randomValue < 0.67) {
-        return generators.subtraction(difficulty, difficultySettings);
+        problem = generators.subtraction(difficulty, difficultySettings);
       } else {
-        return generators.threeNumber(difficulty, difficultySettings);
+        problem = generators.threeNumber(difficulty, difficultySettings);
       }
+      break;
 
     case 'counting':
-      return generators.counting(difficulty, difficultySettings);
+      problem = generators.counting(difficulty, difficultySettings);
+      break;
 
     default:
-      // Default to addition if mode is unknown
-      return generators.addition(difficulty, difficultySettings);
+      console.warn('Unknown game mode:', gameMode, 'falling back to addition');
+      problem = generators.addition(difficulty, difficultySettings);
+      break;
   }
+  
+  // Add source information to the problem object
+  problem.sourceMode = gameMode;
+  
+  console.log('Problem generated from mode', gameMode, ':', problem);
+  return problem;
 }
 
 /**
