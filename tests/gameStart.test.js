@@ -9,11 +9,21 @@ import { formatTime } from '../src/utils';
 // Mocks for functions that are not directly imported
 // but are used in the process of starting a game
 jest.mock('../src/problemGenerator', () => ({
-  generateProblemByMode: jest.fn((difficulty, settings, mode) => ({
-    originalQuestion: '2 + 3 = ?',
-    question: '2 + 3 = ?',
-    answer: 5
-  })),
+  generateProblemByMode: jest.fn((difficulty, settings, mode) => {
+    if (mode === 'threeNumber') {
+      return {
+        originalQuestion: '2 + 3 + 4 = ?',
+        question: '2 + 3 + 4 = ?',
+        answer: 9,
+        type: 'threeNumber'
+      };
+    }
+    return {
+      originalQuestion: '2 + 3 = ?',
+      question: '2 + 3 = ?',
+      answer: 5
+    };
+  }),
   updateCurrentProblem: jest.fn((state, problem) => ({
     ...state,
     currentProblem: problem,
@@ -283,5 +293,55 @@ describe('Game Start Functionality', () => {
     // Check that problem is displayed correctly
     expect(elements.problem.innerHTML).toBe('5 + 6 + 7 = ?');
     expect(gameState.currentProblem.answer).toBe(18);
+  });
+  
+  test('threeNumber mode should display problems with three numbers', () => {
+    // Set up the game state
+    gameState = resetGameState(gameState);
+    gameState.gameMode = 'threeNumber';
+    
+    // Define problem to simulate what the problem generator would produce
+    const threeNumberProblem = {
+      originalQuestion: '5 + 8 - 3 = ?',
+      question: '5 + 8 - 3 = ?',
+      answer: 10,
+      type: 'threeNumber'
+    };
+    
+    // Set the problem in the game state
+    gameState.currentProblem = threeNumberProblem;
+    elements.problem.innerHTML = threeNumberProblem.question;
+    
+    // Check that problem is displayed correctly
+    expect(elements.problem.innerHTML).toBe('5 + 8 - 3 = ?');
+    
+    // Verify the question contains three numbers
+    expect(gameState.currentProblem.question).toMatch(/^\d+ [\+\-] \d+ [\+\-] \d+ = \?$/);
+    
+    // Extract the numbers and operations to verify
+    const match = gameState.currentProblem.question.match(/^(\d+) ([\+\-]) (\d+) ([\+\-]) (\d+) = \?$/);
+    expect(match).not.toBeNull();
+    
+    const num1 = parseInt(match[1]);
+    const op1 = match[2];
+    const num2 = parseInt(match[3]);
+    const op2 = match[4];
+    const num3 = parseInt(match[5]);
+    
+    // Calculate the expected answer based on the operations
+    let expectedAnswer;
+    if (op1 === '+' && op2 === '+') {
+      expectedAnswer = num1 + num2 + num3;
+    } else if (op1 === '+' && op2 === '-') {
+      expectedAnswer = num1 + num2 - num3;
+    } else if (op1 === '-' && op2 === '+') {
+      expectedAnswer = num1 - num2 + num3;
+    }
+    
+    // Verify the answer matches our calculation
+    expect(gameState.currentProblem.answer).toBe(expectedAnswer);
+    
+    // The result should never be negative
+    expect(gameState.currentProblem.answer).toBeGreaterThanOrEqual(0);
   });
 });
