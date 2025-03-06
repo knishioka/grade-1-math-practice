@@ -47,6 +47,32 @@
  *    - Keep functions small and focused on a single task
  */
 
+import { 
+  initGameState, 
+  resetGameState, 
+  updateScore, 
+  recordIncorrectProblem, 
+  getUniqueIncorrectProblems, 
+  calculateAccuracy, 
+  updateGameMode, 
+  updateDifficulty,
+  hasReachedMaxAttempts 
+} from './src/gameState.js';
+
+import { 
+  generateProblemByMode, 
+  generateAdditionProblem,
+  generateSubtractionProblem,
+  generateCountingProblem 
+} from './src/problemGenerator.js';
+
+import { 
+  getRandomNumber, 
+  getRandomDifficulty,
+  formatTime,
+  isValidNumber 
+} from './src/utils.js';
+
 document.addEventListener('DOMContentLoaded', function () {
   // ===================================
   // STATE VARIABLES
@@ -54,18 +80,10 @@ document.addEventListener('DOMContentLoaded', function () {
   // The central state object containing all game data
   // Any changes to the game state should happen through
   // defined functions, not direct manipulation
-  let gameState = {
-    gameMode: 'mixed',
-    difficulty: 'medium',
-    currentProblem: {},
-    score: 0,
-    incorrectAttempts: 0,
-    currentProblemAttempts: 0,
-    timerInterval: null,
-    timeLeft: 180, // 3 minutes in seconds
-    gameActive: false,
-    incorrectProblems: [],
-  };
+  let gameState = initGameState();
+  // Override initial settings to match UI defaults
+  gameState.gameMode = 'mixed';
+  gameState.difficulty = 'medium';
 
   // ===================================
   // DOM ELEMENTS
@@ -251,77 +269,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Generate problem based on game mode
-    generateProblemByMode(activeDifficulty);
+    generateProblemByMode(activeDifficulty, difficultySettings, gameState);
 
     // Display problem
     elements.problem.innerHTML = gameState.currentProblem.question;
-  }
-
-  function generateProblemByMode(activeDifficulty) {
-    switch (gameState.gameMode) {
-      case 'addition':
-        generateAdditionProblem(activeDifficulty);
-        break;
-      case 'subtraction':
-        generateSubtractionProblem(activeDifficulty);
-        break;
-      case 'mixed':
-        Math.random() < 0.5
-          ? generateAdditionProblem(activeDifficulty)
-          : generateSubtractionProblem(activeDifficulty);
-        break;
-      case 'counting':
-        generateCountingProblem(activeDifficulty);
-        break;
-    }
-  }
-
-  function generateAdditionProblem(difficulty) {
-    const settings = difficultySettings.addition[difficulty];
-    const num1 = getRandomNumber(settings.min1, settings.max1);
-    const num2 = getRandomNumber(settings.min2, settings.max2);
-
-    gameState.currentProblem = {
-      originalQuestion: `${num1} + ${num2} = ?`,
-      question: `${num1} + ${num2} = ?`,
-      answer: num1 + num2,
-    };
-  }
-
-  function generateSubtractionProblem(difficulty) {
-    const settings = difficultySettings.subtraction[difficulty];
-    // Ensure the result is never negative
-    const num1 = getRandomNumber(settings.min1, settings.max1);
-    const num2 = getRandomNumber(settings.min2, Math.min(settings.max2, num1));
-
-    gameState.currentProblem = {
-      originalQuestion: `${num1} - ${num2} = ?`,
-      question: `${num1} - ${num2} = ?`,
-      answer: num1 - num2,
-    };
-  }
-
-  function generateCountingProblem(difficulty) {
-    const settings = difficultySettings.counting[difficulty];
-    const count = getRandomNumber(settings.min, settings.max);
-    const emojis = ['🍎', '🍕', '🐶', '🐱', '🦄', '🍦', '🚗', '🌈', '⭐'];
-    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-
-    let emojiString = '';
-    for (let i = 0; i < count; i++) {
-      emojiString += randomEmoji + ' ';
-      // Add a line break for better grouping in harder levels
-      if (difficulty !== 'easy' && i % 5 === 4) {
-        emojiString += '<br>';
-      }
-    }
-
-    const countingQuestion = `How many ${randomEmoji}?<br>${emojiString}`;
-    gameState.currentProblem = {
-      originalQuestion: countingQuestion,
-      question: countingQuestion,
-      answer: count,
-    };
   }
 
   // ===================================
@@ -349,31 +300,26 @@ document.addEventListener('DOMContentLoaded', function () {
   function handleCorrectAnswer() {
     elements.message.textContent = 'Correct! 🎉';
     elements.message.className = 'message correct';
-    gameState.score++;
+    gameState = updateScore(gameState);
     elements.score.textContent = gameState.score;
     // Show new problem immediately
     newProblem();
   }
 
   function handleIncorrectAnswer() {
-    gameState.currentProblemAttempts++;
-    gameState.incorrectAttempts++;
+    gameState = recordIncorrectProblem(gameState, {
+      question: gameState.currentProblem.question,
+      answer: gameState.currentProblem.answer,
+    });
+    
     elements.incorrect.textContent = gameState.incorrectAttempts;
-
-    // If this is first incorrect attempt for this problem, add to list
-    if (gameState.currentProblemAttempts === 1) {
-      gameState.incorrectProblems.push({
-        question: gameState.currentProblem.question,
-        answer: gameState.currentProblem.answer,
-      });
-    }
 
     // Clear the input to make it more obvious it was incorrect
     elements.answerDisplay.textContent = '';
     elements.check.disabled = true;
 
     // Show different messages based on number of attempts
-    if (gameState.currentProblemAttempts >= 3) {
+    if (hasReachedMaxAttempts(gameState)) {
       elements.message.textContent = `The answer is ${gameState.currentProblem.answer}`;
       elements.message.className = 'message hint';
       // Show new problem after briefly showing the answer
@@ -398,12 +344,8 @@ document.addEventListener('DOMContentLoaded', function () {
   function startGame() {
     if (gameState.gameActive) return;
 
-    // Reset game state
-    gameState.score = 0;
-    gameState.incorrectAttempts = 0;
-    gameState.timeLeft = 180; // 3 minutes
-    gameState.gameActive = true;
-    gameState.incorrectProblems = [];
+    // Reset game state with current mode and difficulty
+    gameState = resetGameState(gameState);
 
     // Update UI
     elements.score.textContent = '0';
@@ -429,16 +371,11 @@ document.addEventListener('DOMContentLoaded', function () {
       clearInterval(gameState.timerInterval);
     }
 
-    // Reset game state
-    gameState.gameActive = false;
-    gameState.score = 0;
-    gameState.incorrectAttempts = 0;
-    gameState.timeLeft = 180; // 3 minutes
-    gameState.incorrectProblems = [];
-
-    // Keep default gameMode and difficulty
-    gameState.gameMode = 'mixed';
-    gameState.difficulty = 'medium';
+    // Reset game state completely with default values
+    gameState = initGameState();
+    // Override with UI defaults
+    gameState = updateGameMode(gameState, 'mixed');
+    gameState = updateDifficulty(gameState, 'medium');
 
     // Update UI
     elements.score.textContent = '0';
@@ -503,9 +440,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function showGameResults() {
     // Calculate stats
-    const totalAttempts = gameState.score + gameState.incorrectAttempts;
-    const accuracyRate =
-      totalAttempts > 0 ? Math.round((gameState.score / totalAttempts) * 100) : 0;
+    const accuracyRate = calculateAccuracy(gameState);
 
     // Format difficulty display
     let difficultyDisplay = gameState.difficulty;
@@ -515,12 +450,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Create results HTML
     let resultHTML = `
-            <h2>Time's Up!</h2>
-            <p>Your final score: ${gameState.score}</p>
-            <p>Incorrect attempts: ${gameState.incorrectAttempts}</p>
-            <p>Accuracy: ${accuracyRate}%</p>
-            <p>Difficulty: ${difficultyDisplay}</p>
-        `;
+        <h2>Time's Up!</h2>
+        <p>Your final score: ${gameState.score}</p>
+        <p>Incorrect attempts: ${gameState.incorrectAttempts}</p>
+        <p>Accuracy: ${accuracyRate}%</p>
+        <p>Difficulty: ${difficultyDisplay}</p>
+    `;
 
     // Add incorrect problems if there were any
     if (gameState.incorrectProblems.length > 0) {
@@ -536,34 +471,19 @@ document.addEventListener('DOMContentLoaded', function () {
   function createIncorrectProblemsHTML() {
     let html = `<h3>Problems to Practice:</h3><div class="incorrect-problems">`;
 
-    // Remove duplicates
-    const uniqueProblems = getUniqueProblems();
+    // Get unique problems using the module function
+    const uniqueProblems = getUniqueIncorrectProblems(gameState);
 
     // Add each problem to the results
     for (const problem of uniqueProblems) {
       html += `
-            <div class="problem-item">
-                <div>${problem.question.replace('= ?', '=')}</div>
-                <div class="answer">${problem.answer}</div>
-            </div>`;
+        <div class="problem-item">
+            <div>${problem.question.replace('= ?', '=')}</div>
+            <div class="answer">${problem.answer}</div>
+        </div>`;
     }
 
     return html + '</div>';
-  }
-
-  function getUniqueProblems() {
-    const uniqueProblems = [];
-    const seen = new Set();
-
-    for (const problem of gameState.incorrectProblems) {
-      const key = problem.question + problem.answer;
-      if (!seen.has(key)) {
-        seen.add(key);
-        uniqueProblems.push(problem);
-      }
-    }
-
-    return uniqueProblems;
   }
 
   // ===================================
@@ -603,8 +523,8 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    // Update game mode
-    gameState.gameMode = this.id;
+    // Update game mode using the module function
+    gameState = updateGameMode(gameState, this.id);
 
     // Update UI
     updateOperationButtons(this);
@@ -622,8 +542,8 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    // Update difficulty
-    gameState.difficulty = this.id;
+    // Update difficulty using the module function
+    gameState = updateDifficulty(gameState, this.id);
 
     // Update UI
     updateDifficultyButtons(this);
@@ -651,20 +571,9 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // ===================================
-  // HELPER FUNCTIONS
+  // UI HELPER FUNCTIONS
   // ===================================
-  // Utility functions used throughout the application
-  // Keep these functions pure (same input → same output)
-  // These can be reused across different parts of the app
-  function getRandomNumber(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  function getRandomDifficulty() {
-    const difficulties = ['medium', 'hard'];
-    return difficulties[Math.floor(Math.random() * difficulties.length)];
-  }
-
+  // UI-specific utility functions
   function setControlsEnabled(enabled) {
     // Set check button
     elements.check.disabled = true; // Always start disabled until input
