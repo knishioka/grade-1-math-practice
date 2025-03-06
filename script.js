@@ -61,16 +61,12 @@ import {
 
 import { 
   generateProblemByMode, 
-  generateAdditionProblem,
-  generateSubtractionProblem,
-  generateCountingProblem 
+  updateCurrentProblem
 } from './src/problemGenerator.js';
 
 import { 
-  getRandomNumber, 
   getRandomDifficulty,
-  formatTime,
-  isValidNumber 
+  formatTime
 } from './src/utils.js';
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -257,7 +253,6 @@ document.addEventListener('DOMContentLoaded', function () {
     elements.answerDisplay.textContent = '';
     elements.message.textContent = '';
     elements.message.className = 'message';
-    gameState.currentProblemAttempts = 0;
 
     // Disable check button until an answer is entered
     elements.check.disabled = true;
@@ -268,8 +263,9 @@ document.addEventListener('DOMContentLoaded', function () {
       activeDifficulty = getRandomDifficulty();
     }
 
-    // Generate problem based on game mode
-    generateProblemByMode(activeDifficulty, difficultySettings, gameState);
+    // Generate problem based on game mode and update the game state
+    const problem = generateProblemByMode(activeDifficulty, difficultySettings, gameState.gameMode);
+    gameState = updateCurrentProblem(gameState, problem);
 
     // Display problem
     elements.problem.innerHTML = gameState.currentProblem.question;
@@ -494,9 +490,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // 1. Modify timeLeft initial value in gameState
   // 2. Adjust updateTimer for different timing behavior
   function updateTimer() {
-    const minutes = Math.floor(gameState.timeLeft / 60);
-    const seconds = gameState.timeLeft % 60;
-    elements.timer.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    elements.timer.textContent = formatTime(gameState.timeLeft);
 
     if (gameState.timeLeft <= 60) {
       elements.timer.classList.add('time-warning');

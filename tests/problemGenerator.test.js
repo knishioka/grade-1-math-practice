@@ -8,14 +8,8 @@ import {
   generateSubtractionProblem,
   generateCountingProblem,
   generateProblemByMode,
+  updateCurrentProblem
 } from '../src/problemGenerator';
-
-// Mock game state
-const mockGameState = {
-  gameMode: 'addition',
-  difficulty: 'easy',
-  currentProblem: {},
-};
 
 // Mock difficulty settings
 const mockDifficultySettings = {
@@ -39,7 +33,7 @@ const mockDifficultySettings = {
 describe('Problem Generator Functions', () => {
   describe('generateAdditionProblem', () => {
     test('creates valid addition problems', () => {
-      const result = generateAdditionProblem('easy', mockDifficultySettings, mockGameState);
+      const result = generateAdditionProblem('easy', mockDifficultySettings);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -58,7 +52,7 @@ describe('Problem Generator Functions', () => {
 
     test('respects difficulty settings', () => {
       // Test easy difficulty
-      const easyResult = generateAdditionProblem('easy', mockDifficultySettings, mockGameState);
+      const easyResult = generateAdditionProblem('easy', mockDifficultySettings);
       const easyMatch = easyResult.question.match(/^(\d+) \+ (\d+) = \?$/);
       const easyNum1 = parseInt(easyMatch[1]);
       const easyNum2 = parseInt(easyMatch[2]);
@@ -67,7 +61,7 @@ describe('Problem Generator Functions', () => {
       expect(easyNum2).toBeInRange(1, 10);
 
       // Test hard difficulty
-      const hardResult = generateAdditionProblem('hard', mockDifficultySettings, mockGameState);
+      const hardResult = generateAdditionProblem('hard', mockDifficultySettings);
       const hardMatch = hardResult.question.match(/^(\d+) \+ (\d+) = \?$/);
       const hardNum1 = parseInt(hardMatch[1]);
       const hardNum2 = parseInt(hardMatch[2]);
@@ -79,7 +73,7 @@ describe('Problem Generator Functions', () => {
 
   describe('generateSubtractionProblem', () => {
     test('creates valid subtraction problems with positive results', () => {
-      const result = generateSubtractionProblem('easy', mockDifficultySettings, mockGameState);
+      const result = generateSubtractionProblem('easy', mockDifficultySettings);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -101,7 +95,7 @@ describe('Problem Generator Functions', () => {
 
   describe('generateCountingProblem', () => {
     test('creates valid counting problems', () => {
-      const result = generateCountingProblem('easy', mockDifficultySettings, mockGameState);
+      const result = generateCountingProblem('easy', mockDifficultySettings);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -126,44 +120,58 @@ describe('Problem Generator Functions', () => {
       };
 
       // Test addition mode
-      mockGameState.gameMode = 'addition';
-      generateProblemByMode('easy', mockDifficultySettings, mockGameState, mockGenerators);
+      generateProblemByMode('easy', mockDifficultySettings, 'addition', mockGenerators);
       expect(mockGenerators.addition).toHaveBeenCalledWith(
         'easy',
-        mockDifficultySettings,
-        mockGameState
+        mockDifficultySettings
       );
 
       // Test subtraction mode
-      mockGameState.gameMode = 'subtraction';
-      generateProblemByMode('easy', mockDifficultySettings, mockGameState, mockGenerators);
+      generateProblemByMode('easy', mockDifficultySettings, 'subtraction', mockGenerators);
       expect(mockGenerators.subtraction).toHaveBeenCalledWith(
         'easy',
-        mockDifficultySettings,
-        mockGameState
+        mockDifficultySettings
       );
 
       // Test counting mode
-      mockGameState.gameMode = 'counting';
-      generateProblemByMode('easy', mockDifficultySettings, mockGameState, mockGenerators);
+      generateProblemByMode('easy', mockDifficultySettings, 'counting', mockGenerators);
       expect(mockGenerators.counting).toHaveBeenCalledWith(
         'easy',
-        mockDifficultySettings,
-        mockGameState
+        mockDifficultySettings
       );
     });
 
     test('handles mixed mode by choosing addition or subtraction', () => {
-      const mixedResult = generateProblemByMode('easy', mockDifficultySettings, {
-        ...mockGameState,
-        gameMode: 'mixed',
-      });
+      const mixedResult = generateProblemByMode('easy', mockDifficultySettings, 'mixed');
 
       // Should either be an addition or subtraction problem
       const isAddition = mixedResult.question.includes('+');
       const isSubtraction = mixedResult.question.includes('-');
 
       expect(isAddition || isSubtraction).toBe(true);
+    });
+  });
+
+  describe('updateCurrentProblem', () => {
+    test('updates game state with new problem and resets attempts', () => {
+      const gameState = {
+        currentProblem: {},
+        currentProblemAttempts: 5,
+        otherProperty: 'value'
+      };
+      
+      const problem = {
+        question: '1 + 1 = ?',
+        answer: 2
+      };
+      
+      const result = updateCurrentProblem(gameState, problem);
+      
+      expect(result).toEqual({
+        currentProblem: problem,
+        currentProblemAttempts: 0,
+        otherProperty: 'value'
+      });
     });
   });
 });
