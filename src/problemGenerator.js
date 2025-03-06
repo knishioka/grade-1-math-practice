@@ -83,9 +83,9 @@ export function generateThreeNumberProblem(difficulty, difficultySettings) {
   // 3. a - b + c
   // Exclude a - b - c because it might result in negative numbers more easily
   
-  // FORCE problem type to 1 (a + b + c) for now to ensure 3 numbers are used
-  const problemType = 1; // Always generate a + b + c problems
-  console.log('FORCED problem type to 1 (a + b + c)');
+  // Randomly choose problem type from 1-3
+  const problemType = getRandomNumber(1, 3);
+  console.log(`Selected problem type: ${problemType}`);
   
   let question, answer;
   
