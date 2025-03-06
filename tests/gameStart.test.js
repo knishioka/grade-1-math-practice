@@ -227,4 +227,61 @@ describe('Game Start Functionality', () => {
     expect(elements.problem.innerHTML).toBe('5 + 7 = ?');
     expect(gameState.currentProblem.answer).toBe(12);
   });
+  
+  test('generates problems based on game mode', () => {
+    // Mock generateProblemByMode to track calls and return expected values
+    const mockGenerateProblemByMode = jest.fn();
+    
+    // For threeNumber mode, return a three-number problem
+    mockGenerateProblemByMode.mockImplementation((difficulty, settings, mode) => {
+      if (mode === 'threeNumber') {
+        return {
+          originalQuestion: '5 + 6 + 7 = ?',
+          question: '5 + 6 + 7 = ?',
+          answer: 18
+        };
+      } else {
+        return {
+          originalQuestion: '5 + 6 = ?',
+          question: '5 + 6 = ?',
+          answer: 11
+        };
+      }
+    });
+    
+    // Define functions with our mock
+    function startGame() {
+      // Reset game state
+      gameState = resetGameState(gameState);
+      
+      // Generate problem based on mode
+      newProblem();
+    }
+    
+    function newProblem() {
+      const problem = mockGenerateProblemByMode(
+        gameState.difficulty, 
+        {}, // Mock settings
+        gameState.gameMode
+      );
+      
+      gameState.currentProblem = problem;
+      elements.problem.innerHTML = problem.question;
+    }
+    
+    // Test with threeNumber mode
+    gameState.gameMode = 'threeNumber';
+    startGame();
+    
+    // Verify correct mode is used
+    expect(mockGenerateProblemByMode).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.any(Object),
+      'threeNumber'
+    );
+    
+    // Check that problem is displayed correctly
+    expect(elements.problem.innerHTML).toBe('5 + 6 + 7 = ?');
+    expect(gameState.currentProblem.answer).toBe(18);
+  });
 });

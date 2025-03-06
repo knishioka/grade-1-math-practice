@@ -413,23 +413,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Enable inputs
     setControlsEnabled(true);
     
-    // Manually generate a problem
+    // Reset input state
     elements.answerDisplay.textContent = '';
     elements.message.textContent = '';
     elements.message.className = 'message';
     elements.check.disabled = true;
     
-    // Generate a simple addition problem directly - bypass the complex logic for now
-    const num1 = Math.floor(Math.random() * 10) + 1;
-    const num2 = Math.floor(Math.random() * 10) + 1;
-    const problem = {
-      originalQuestion: `${num1} + ${num2} = ?`,
-      question: `${num1} + ${num2} = ?`,
-      answer: num1 + num2
-    };
-    
-    gameState.currentProblem = problem;
-    elements.problem.innerHTML = problem.question;
+    // Generate a problem based on the selected mode and difficulty
+    console.log('Generating problem for mode:', gameState.gameMode);
+    newProblem();
     
     // Start timer
     console.log('Starting timer');
