@@ -3,7 +3,11 @@
  * Functions for manipulating the core game state
  */
 
-// No imports needed for this module
+// Game constants
+export const DEFAULT_GAME_MODE = 'addition';
+export const DEFAULT_DIFFICULTY = 'easy';
+export const DEFAULT_TIMER = 180; // 3 minutes in seconds
+export const MAX_PROBLEM_ATTEMPTS = 3;
 
 /**
  * Initialize a new game state with default values
@@ -11,13 +15,13 @@
  */
 export function initGameState() {
   return {
-    gameMode: 'addition',
-    difficulty: 'easy',
+    gameMode: DEFAULT_GAME_MODE,
+    difficulty: DEFAULT_DIFFICULTY,
     currentProblem: {},
     score: 0,
     incorrectAttempts: 0,
     currentProblemAttempts: 0,
-    timeLeft: 180, // 3 minutes in seconds
+    timeLeft: DEFAULT_TIMER,
     gameActive: false,
     incorrectProblems: [],
   };
@@ -35,7 +39,7 @@ export function resetGameState(state) {
     score: 0,
     incorrectAttempts: 0,
     currentProblemAttempts: 0,
-    timeLeft: 180,
+    timeLeft: DEFAULT_TIMER,
     gameActive: true,
     incorrectProblems: [],
     currentProblem: {},
@@ -108,7 +112,7 @@ export function calculateAccuracy(state) {
  * @param {number} maxAttempts - Maximum attempts allowed
  * @return {boolean} True if max attempts reached, false otherwise
  */
-export function hasReachedMaxAttempts(state, maxAttempts = 3) {
+export function hasReachedMaxAttempts(state, maxAttempts = MAX_PROBLEM_ATTEMPTS) {
   return state.currentProblemAttempts >= maxAttempts;
 }
 
