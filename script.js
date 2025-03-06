@@ -304,7 +304,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Generate problem based on game mode and update the game state
+    console.log('Generating problem with mode:', gameState.gameMode, 'and difficulty:', activeDifficulty);
     const problem = generateProblemByMode(activeDifficulty, difficultySettings, gameState.gameMode);
+    console.log('Generated problem:', problem);
     gameState = updateCurrentProblem(gameState, problem);
     
     // Preserve gameActive status after updateCurrentProblem
@@ -384,6 +386,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // When adding new game features, consider their lifecycle integration
   function startGame() {
     console.log('startGame called');
+    console.log('Current gameMode before start:', gameState.gameMode);
+    console.log('Active operation button:', document.querySelector('.operation-btn.active')?.id);
     
     // Initialize a fresh game state and manually set gameActive
     // Don't use resetGameState for now to eliminate any potential issues
@@ -399,6 +403,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
     
     console.log('Game state after reset:', gameState);
+    console.log('Game mode after reset:', gameState.gameMode);
     
     // Update UI
     elements.score.textContent = '0';
@@ -593,7 +598,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Update game mode using the module function
+    console.log('Setting game mode to:', this.id);
     gameState = updateGameMode(gameState, this.id);
+    console.log('Updated game state:', gameState);
 
     // Update UI
     updateOperationButtons(this);
@@ -658,12 +665,15 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function updateOperationButtons(activeButton) {
+    console.log('Updating operation buttons, active button id:', activeButton.id);
     elements.operationButtons.forEach(btn => {
       btn.classList.remove('active');
       btn.classList.add('inactive');
+      console.log(`Button ${btn.id} - classList:`, btn.classList.toString());
     });
     activeButton.classList.remove('inactive');
     activeButton.classList.add('active');
+    console.log('After update, active button classList:', activeButton.classList.toString());
   }
 
   function updateDifficultyButtons(activeButton) {
