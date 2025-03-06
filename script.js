@@ -772,13 +772,21 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
+    // First decrement the timeLeft counter
+    gameState.timeLeft--;
+
     // Check if the game should end
-    if (gameState.timeLeft <= 0) {
+    if (gameState.timeLeft < 0) {
+      // Set to 0 to ensure we display 0:00 before ending
+      gameState.timeLeft = 0;
+      // Update display to show 0:00
+      elements.timer.textContent = formatTime(gameState.timeLeft);
+      // End the game
       endGame();
       return;
     }
 
-    // First update the display with the current time value
+    // Update the display with the current time value
     // Use the formatTime utility for consistent time formatting
     elements.timer.textContent = formatTime(gameState.timeLeft);
 
@@ -786,9 +794,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (gameState.timeLeft <= 60) {
       elements.timer.classList.add('time-warning');
     }
-
-    // Then decrement the timeLeft counter for the next update
-    gameState.timeLeft--;
   }
 
   // ===================================
