@@ -70,7 +70,8 @@ import {
 import { getRandomDifficulty, formatTime } from '/src/utils.js';
 
 // 開発モード判定のためのフラグ
-const IS_DEBUG = true; // 本番環境ではfalseに設定する
+// 本番環境ではfalseに設定する
+const IS_DEBUG = true;
 
 /**
  * デバッグモードのときだけログを出力する
