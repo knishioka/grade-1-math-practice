@@ -69,6 +69,19 @@ import {
 
 import { getRandomDifficulty, formatTime } from '/src/utils.js';
 
+// 開発モード判定のためのフラグ
+const IS_DEBUG = true; // 本番環境ではfalseに設定する
+
+/**
+ * デバッグモードのときだけログを出力する
+ * @param {...any} args - コンソールに出力する引数
+ */
+function debug(...args) {
+  if (IS_DEBUG) {
+    console.log(...args);
+  }
+}
+
 // Note: We've removed the global gameStart function and custom event listeners
 // since they were causing duplicate timer execution
 
@@ -175,13 +188,13 @@ document.addEventListener('DOMContentLoaded', function () {
   // The init function is the entry point of the application
   // Separating initialization from execution improves testability
   function init() {
-    console.log('Initializing app...');
-    console.log('Elements:', elements);
+    debug('Initializing app...');
+    debug('Elements:', elements);
 
     // Check all operation buttons
-    console.log('Checking all operation buttons at initialization:');
+    debug('Checking all operation buttons at initialization:');
     elements.operationButtons.forEach(btn => {
-      console.log(
+      debug(
         `Operation button: id=${btn.id}, text="${
           btn.textContent
         }", classList=${btn.classList.toString()}`
@@ -201,11 +214,11 @@ document.addEventListener('DOMContentLoaded', function () {
     updateDefaultActiveButtons();
 
     // Log active operation button after defaults are set
-    console.log(
+    debug(
       'Active operation button after defaults:',
       document.querySelector('.operation-btn.active')?.id
     );
-    console.log('Initial game mode:', gameState.gameMode);
+    debug('Initial game mode:', gameState.gameMode);
 
     // Add event listeners
     attachEventListeners();
@@ -281,31 +294,45 @@ document.addEventListener('DOMContentLoaded', function () {
   // 1. Create a new generator function
   // 2. Add to the generateProblemByMode switch statement
   // 3. Ensure consistent problem object structure
+
+  // 開発モード判定のためのフラグ
+  const IS_DEBUG = true; // 本番環境ではfalseに設定する
+
+  /**
+   * デバッグモードのときだけログを出力する
+   * @param {...any} args - コンソールに出力する引数
+   */
+  function debug(...args) {
+    if (IS_DEBUG) {
+      console.log(...args);
+    }
+  }
+
+  /**
+   * 現在のゲームモードと難易度に基づいて新しい問題を生成し表示する
+   */
   function newProblem() {
     // Ensure gameActive is true when generating a new problem
     if (!gameState.gameActive) {
-      console.log('newProblem called but game not active - fixing');
+      debug('newProblem called but game not active - fixing');
       gameState.gameActive = true;
     }
 
     // Log current game mode again before generating problem
-    console.log(
+    debug(
       'Current gameMode in newProblem:',
       gameState.gameMode,
       'active button:',
       document.querySelector('.operation-btn.active')?.id
     );
-    console.log('Game state object:', JSON.stringify(gameState));
 
     // CRITICAL FIX: Make sure gameMode matches the active button
     // This ensures UI and state are in sync
     const activeButtonId = document.querySelector('.operation-btn.active')?.id;
     if (activeButtonId && gameState.gameMode !== activeButtonId) {
-      console.log('CRITICAL ERROR: Game mode mismatch detected!');
-      console.log(
-        `Active button is ${activeButtonId} but gameState.gameMode is ${gameState.gameMode}`
-      );
-      console.log('Fixing by updating gameState.gameMode to match active button');
+      debug('CRITICAL ERROR: Game mode mismatch detected!');
+      debug(`Active button is ${activeButtonId} but gameState.gameMode is ${gameState.gameMode}`);
+      debug('Fixing by updating gameState.gameMode to match active button');
       gameState.gameMode = activeButtonId;
     }
 
@@ -323,27 +350,18 @@ document.addEventListener('DOMContentLoaded', function () {
       activeDifficulty = getRandomDifficulty();
     }
 
-    // Generate problem based on game mode and update the game state
-    console.log(
-      'Generating problem with mode:',
-      gameState.gameMode,
-      'and difficulty:',
-      activeDifficulty
-    );
-    // Examine difficultySettings being passed
-    console.log('difficultySettings keys:', Object.keys(difficultySettings));
-    console.log('threeNumber settings:', JSON.stringify(difficultySettings.threeNumber));
+    debug('Generating problem with mode:', gameState.gameMode, 'and difficulty:', activeDifficulty);
 
     // Ensure we're actually calling the intended generator
     let problem;
     if (gameState.gameMode === 'threeNumber') {
       try {
         // Force three number problem generation - manually create a problem with 3 numbers
-        console.log('Manually creating a three-number problem');
+        debug('Manually creating a three-number problem');
 
         // Lookup difficulty settings
         const settings = difficultySettings.threeNumber[activeDifficulty];
-        console.log('Using settings:', settings);
+        debug('Using settings:', settings);
 
         if (!settings) {
           throw new Error('No settings found for threeNumber difficulty: ' + activeDifficulty);
@@ -357,11 +375,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const num3 =
           Math.floor(Math.random() * (settings.max3 - settings.min3 + 1)) + settings.min3;
 
-        console.log(`Generated three numbers: ${num1}, ${num2}, ${num3}`);
+        debug(`Generated three numbers: ${num1}, ${num2}, ${num3}`);
 
         // Randomly choose a problem type (1-3) just like in problemGenerator.js
         const problemType = Math.floor(Math.random() * 3) + 1;
-        console.log('Selected problem type:', problemType);
+        debug('Selected problem type:', problemType);
 
         let question, answer;
 
@@ -407,12 +425,12 @@ document.addEventListener('DOMContentLoaded', function () {
           sourceMode: 'threeNumber',
         };
 
-        console.log('Manually created problem:', problem);
+        debug('Manually created problem:', problem);
       } catch (error) {
-        console.error('Error creating three-number problem:', error);
+        debug('Error creating three-number problem:', error);
         // IMPORTANT: Since we need 3 numbers, we must NOT fall back to regular generation
         // Instead, create a simple a + b + c problem as a reliable fallback
-        console.log('Creating simple a + b + c fallback problem');
+        debug('Creating simple a + b + c fallback problem');
 
         const settings = difficultySettings.threeNumber[activeDifficulty] || {
           min1: 1,
@@ -444,7 +462,7 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
       // Normal flow for other modes
       problem = generateProblemByMode(activeDifficulty, difficultySettings, gameState.gameMode);
-      console.log('Generated problem via mode:', problem);
+      debug('Generated problem via mode:', problem);
     }
 
     // Update the game state with the new problem
@@ -457,7 +475,7 @@ document.addEventListener('DOMContentLoaded', function () {
     elements.problem.innerHTML = gameState.currentProblem.question;
 
     // Add debug info (only during development)
-    if (gameState.currentProblem.sourceMode) {
+    if (IS_DEBUG && gameState.currentProblem.sourceMode) {
       const debugInfo = document.createElement('div');
       debugInfo.style.fontSize = '10px';
       debugInfo.style.color = '#999';
@@ -466,6 +484,8 @@ document.addEventListener('DOMContentLoaded', function () {
       elements.problem.appendChild(debugInfo);
     }
   }
+
+  // リファクタリング過程の関数重複を削除
 
   // ===================================
   // ANSWER CHECKING
