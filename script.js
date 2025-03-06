@@ -329,8 +329,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Generate problem based on game mode and update the game state
     console.log('Generating problem with mode:', gameState.gameMode, 'and difficulty:', activeDifficulty);
-    const problem = generateProblemByMode(activeDifficulty, difficultySettings, gameState.gameMode);
-    console.log('Generated problem:', problem);
+    // Examine difficultySettings being passed
+    console.log('difficultySettings keys:', Object.keys(difficultySettings));
+    console.log('threeNumber settings:', JSON.stringify(difficultySettings.threeNumber));
+    
+    // Ensure we're actually calling the intended generator
+    let problem;
+    if (gameState.gameMode === 'threeNumber') {
+      // Force three number problem generation directly
+      console.log('DIRECT CALL to generateThreeNumberProblem');
+      problem = generateThreeNumberProblem(activeDifficulty, difficultySettings);
+      console.log('Generated problem directly:', problem);
+    } else {
+      // Normal flow for other modes
+      problem = generateProblemByMode(activeDifficulty, difficultySettings, gameState.gameMode);
+      console.log('Generated problem via mode:', problem);
+    }
+    
+    // Update the game state with the new problem
     gameState = updateCurrentProblem(gameState, problem);
     
     // Preserve gameActive status after updateCurrentProblem

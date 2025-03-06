@@ -83,8 +83,9 @@ export function generateThreeNumberProblem(difficulty, difficultySettings) {
   // 3. a - b + c
   // Exclude a - b - c because it might result in negative numbers more easily
   
-  const problemType = getRandomNumber(1, 3);
-  console.log('Selected problem type:', problemType);
+  // FORCE problem type to 1 (a + b + c) for now to ensure 3 numbers are used
+  const problemType = 1; // Always generate a + b + c problems
+  console.log('FORCED problem type to 1 (a + b + c)');
   
   let question, answer;
   
@@ -198,7 +199,17 @@ export function generateProblemByMode(
 
     case 'threeNumber':
       console.log('Explicitly generating a threeNumber problem');
-      problem = generators.threeNumber(difficulty, difficultySettings);
+      console.log('Generator function:', generators.threeNumber.name);
+      console.log('Difficulty settings for threeNumber mode:', JSON.stringify(difficultySettings.threeNumber));
+      // Call the generator directly with detailed troubleshooting
+      try {
+        problem = generators.threeNumber(difficulty, difficultySettings);
+        console.log('Successfully generated threeNumber problem:', problem);
+      } catch (err) {
+        console.error('ERROR generating threeNumber problem:', err);
+        // Fallback to addition as emergency measure
+        problem = generators.addition(difficulty, difficultySettings);
+      }
       break;
 
     case 'mixed':
