@@ -47,42 +47,38 @@
  *    - Keep functions small and focused on a single task
  */
 
-import { 
-  initGameState, 
-  resetGameState, 
-  updateScore, 
-  recordIncorrectProblem, 
-  getUniqueIncorrectProblems, 
-  calculateAccuracy, 
-  updateGameMode, 
+import {
+  initGameState,
+  resetGameState,
+  updateScore,
+  recordIncorrectProblem,
+  getUniqueIncorrectProblems,
+  calculateAccuracy,
+  updateGameMode,
   updateDifficulty,
-  hasReachedMaxAttempts 
+  hasReachedMaxAttempts,
 } from '/src/gameState.js';
 
-import { 
-  generateProblemByMode, 
+import {
+  generateProblemByMode,
   updateCurrentProblem,
   generateThreeNumberProblem, // <-- Add direct import for three number problems
   generateAdditionProblem,
-  generateSubtractionProblem
+  generateSubtractionProblem,
 } from '/src/problemGenerator.js';
 
-import { 
-  getRandomDifficulty,
-  formatTime
-} from '/src/utils.js';
+import { getRandomDifficulty, formatTime } from '/src/utils.js';
 
 // グローバル関数としてゲーム開始関数を定義
-window.gameStart = function() {
+window.gameStart = function () {
   console.log('Global gameStart function called!');
   const event = new Event('startGame');
   document.dispatchEvent(event);
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-  
   // カスタムイベントを追加
-  document.addEventListener('startGame', function() {
+  document.addEventListener('startGame', function () {
     console.log('Start game event received!');
     startGame();
   });
@@ -190,13 +186,17 @@ document.addEventListener('DOMContentLoaded', function () {
   function init() {
     console.log('Initializing app...');
     console.log('Elements:', elements);
-    
+
     // Check all operation buttons
     console.log('Checking all operation buttons at initialization:');
     elements.operationButtons.forEach(btn => {
-      console.log(`Operation button: id=${btn.id}, text="${btn.textContent}", classList=${btn.classList.toString()}`);
+      console.log(
+        `Operation button: id=${btn.id}, text="${
+          btn.textContent
+        }", classList=${btn.classList.toString()}`
+      );
     });
-    
+
     // Set initial display
     elements.problem.innerHTML = '<p class="waiting-message">Press Start to begin</p>';
     if (elements.modeDisplay) {
@@ -208,18 +208,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Update active buttons
     updateDefaultActiveButtons();
-    
+
     // Log active operation button after defaults are set
-    console.log('Active operation button after defaults:', document.querySelector('.operation-btn.active')?.id);
+    console.log(
+      'Active operation button after defaults:',
+      document.querySelector('.operation-btn.active')?.id
+    );
     console.log('Initial game mode:', gameState.gameMode);
 
     // Add event listeners
     attachEventListeners();
-    
+
     // Add direct listener to start button again for redundancy
     if (elements.startBtn) {
       console.log('Adding direct click listener to start button');
-      elements.startBtn.addEventListener('click', function() {
+      elements.startBtn.addEventListener('click', function () {
         console.log('Start button clicked directly!');
         startGame();
       });
@@ -229,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Disable interactive elements initially
     setControlsEnabled(false);
-    
+
     console.log('Initialization complete!');
   }
 
@@ -301,21 +304,28 @@ document.addEventListener('DOMContentLoaded', function () {
       console.log('newProblem called but game not active - fixing');
       gameState.gameActive = true;
     }
-    
+
     // Log current game mode again before generating problem
-    console.log('Current gameMode in newProblem:', gameState.gameMode, 'active button:', document.querySelector('.operation-btn.active')?.id);
+    console.log(
+      'Current gameMode in newProblem:',
+      gameState.gameMode,
+      'active button:',
+      document.querySelector('.operation-btn.active')?.id
+    );
     console.log('Game state object:', JSON.stringify(gameState));
-    
+
     // CRITICAL FIX: Make sure gameMode matches the active button
     // This ensures UI and state are in sync
     const activeButtonId = document.querySelector('.operation-btn.active')?.id;
     if (activeButtonId && gameState.gameMode !== activeButtonId) {
       console.log('CRITICAL ERROR: Game mode mismatch detected!');
-      console.log(`Active button is ${activeButtonId} but gameState.gameMode is ${gameState.gameMode}`);
+      console.log(
+        `Active button is ${activeButtonId} but gameState.gameMode is ${gameState.gameMode}`
+      );
       console.log('Fixing by updating gameState.gameMode to match active button');
       gameState.gameMode = activeButtonId;
     }
-    
+
     // Reset input and messages
     elements.answerDisplay.textContent = '';
     elements.message.textContent = '';
@@ -331,105 +341,121 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Generate problem based on game mode and update the game state
-    console.log('Generating problem with mode:', gameState.gameMode, 'and difficulty:', activeDifficulty);
+    console.log(
+      'Generating problem with mode:',
+      gameState.gameMode,
+      'and difficulty:',
+      activeDifficulty
+    );
     // Examine difficultySettings being passed
     console.log('difficultySettings keys:', Object.keys(difficultySettings));
     console.log('threeNumber settings:', JSON.stringify(difficultySettings.threeNumber));
-    
+
     // Ensure we're actually calling the intended generator
     let problem;
     if (gameState.gameMode === 'threeNumber') {
       try {
         // Force three number problem generation - manually create a problem with 3 numbers
         console.log('Manually creating a three-number problem');
-        
+
         // Lookup difficulty settings
         const settings = difficultySettings.threeNumber[activeDifficulty];
         console.log('Using settings:', settings);
-        
+
         if (!settings) {
           throw new Error('No settings found for threeNumber difficulty: ' + activeDifficulty);
         }
-        
+
         // Generate three random numbers based on the settings
-        const num1 = Math.floor(Math.random() * (settings.max1 - settings.min1 + 1)) + settings.min1;
-        const num2 = Math.floor(Math.random() * (settings.max2 - settings.min2 + 1)) + settings.min2;
-        const num3 = Math.floor(Math.random() * (settings.max3 - settings.min3 + 1)) + settings.min3;
-        
+        const num1 =
+          Math.floor(Math.random() * (settings.max1 - settings.min1 + 1)) + settings.min1;
+        const num2 =
+          Math.floor(Math.random() * (settings.max2 - settings.min2 + 1)) + settings.min2;
+        const num3 =
+          Math.floor(Math.random() * (settings.max3 - settings.min3 + 1)) + settings.min3;
+
         console.log(`Generated three numbers: ${num1}, ${num2}, ${num3}`);
-        
+
         // Randomly choose a problem type (1-3) just like in problemGenerator.js
         const problemType = Math.floor(Math.random() * 3) + 1;
         console.log('Selected problem type:', problemType);
-        
+
         let question, answer;
-        
+
         switch (problemType) {
-          case 1: // a + b + c
-            question = `${num1} + ${num2} + ${num3} = ?`;
-            answer = num1 + num2 + num3;
-            break;
-            
-          case 2: // a + b - c
-            // Make sure sum of first two numbers is greater than third to avoid negative results
-            if (num1 + num2 <= num3) {
-              // Adjust num3 to be smaller than num1 + num2
-              const adjustedNum3 = Math.min(num3, num1 + num2 - 1);
-              question = `${num1} + ${num2} - ${adjustedNum3} = ?`;
-              answer = num1 + num2 - adjustedNum3;
-            } else {
-              question = `${num1} + ${num2} - ${num3} = ?`;
-              answer = num1 + num2 - num3;
-            }
-            break;
-            
-          case 3: // a - b + c
-            // Ensure a > b to avoid negative intermediate results
-            if (num1 <= num2) {
-              // If num1 is too small, swap num1 and num2 or use a safe value for num2
-              const safeNum2 = Math.min(num2, num1 - 1 > 0 ? num1 - 1 : 1);
-              question = `${num1} - ${safeNum2} + ${num3} = ?`;
-              answer = num1 - safeNum2 + num3;
-            } else {
-              question = `${num1} - ${num2} + ${num3} = ?`;
-              answer = num1 - num2 + num3;
-            }
-            break;
+        case 1: // a + b + c
+          question = `${num1} + ${num2} + ${num3} = ?`;
+          answer = num1 + num2 + num3;
+          break;
+
+        case 2: // a + b - c
+          // Make sure sum of first two numbers is greater than third to avoid negative results
+          if (num1 + num2 <= num3) {
+            // Adjust num3 to be smaller than num1 + num2
+            const adjustedNum3 = Math.min(num3, num1 + num2 - 1);
+            question = `${num1} + ${num2} - ${adjustedNum3} = ?`;
+            answer = num1 + num2 - adjustedNum3;
+          } else {
+            question = `${num1} + ${num2} - ${num3} = ?`;
+            answer = num1 + num2 - num3;
+          }
+          break;
+
+        case 3: // a - b + c
+          // Ensure a > b to avoid negative intermediate results
+          if (num1 <= num2) {
+            // If num1 is too small, swap num1 and num2 or use a safe value for num2
+            const safeNum2 = Math.min(num2, num1 - 1 > 0 ? num1 - 1 : 1);
+            question = `${num1} - ${safeNum2} + ${num3} = ?`;
+            answer = num1 - safeNum2 + num3;
+          } else {
+            question = `${num1} - ${num2} + ${num3} = ?`;
+            answer = num1 - num2 + num3;
+          }
+          break;
         }
-        
+
         // Create the problem object
         problem = {
           originalQuestion: question,
           question: question,
           answer: answer,
           type: 'threeNumber',
-          sourceMode: 'threeNumber'
+          sourceMode: 'threeNumber',
         };
-        
+
         console.log('Manually created problem:', problem);
       } catch (error) {
         console.error('Error creating three-number problem:', error);
         // IMPORTANT: Since we need 3 numbers, we must NOT fall back to regular generation
         // Instead, create a simple a + b + c problem as a reliable fallback
         console.log('Creating simple a + b + c fallback problem');
-        
+
         const settings = difficultySettings.threeNumber[activeDifficulty] || {
-          min1: 1, max1: 10, min2: 1, max2: 5, min3: 1, max3: 5
+          min1: 1,
+          max1: 10,
+          min2: 1,
+          max2: 5,
+          min3: 1,
+          max3: 5,
         };
-        
-        const num1 = Math.floor(Math.random() * (settings.max1 - settings.min1 + 1)) + settings.min1;
-        const num2 = Math.floor(Math.random() * (settings.max2 - settings.min2 + 1)) + settings.min2;
-        const num3 = Math.floor(Math.random() * (settings.max3 - settings.min3 + 1)) + settings.min3;
-        
+
+        const num1 =
+          Math.floor(Math.random() * (settings.max1 - settings.min1 + 1)) + settings.min1;
+        const num2 =
+          Math.floor(Math.random() * (settings.max2 - settings.min2 + 1)) + settings.min2;
+        const num3 =
+          Math.floor(Math.random() * (settings.max3 - settings.min3 + 1)) + settings.min3;
+
         const question = `${num1} + ${num2} + ${num3} = ?`;
         const answer = num1 + num2 + num3;
-        
+
         problem = {
           originalQuestion: question,
           question: question,
           answer: answer,
           type: 'threeNumber',
-          sourceMode: 'threeNumber (fallback)'
+          sourceMode: 'threeNumber (fallback)',
         };
       }
     } else {
@@ -437,16 +463,16 @@ document.addEventListener('DOMContentLoaded', function () {
       problem = generateProblemByMode(activeDifficulty, difficultySettings, gameState.gameMode);
       console.log('Generated problem via mode:', problem);
     }
-    
+
     // Update the game state with the new problem
     gameState = updateCurrentProblem(gameState, problem);
-    
+
     // Preserve gameActive status after updateCurrentProblem
     gameState.gameActive = true;
 
     // Display problem and add debug information to DOM
     elements.problem.innerHTML = gameState.currentProblem.question;
-    
+
     // Add debug info (only during development)
     if (gameState.currentProblem.sourceMode) {
       const debugInfo = document.createElement('div');
@@ -496,7 +522,7 @@ document.addEventListener('DOMContentLoaded', function () {
       question: gameState.currentProblem.question,
       answer: gameState.currentProblem.answer,
     });
-    
+
     elements.incorrect.textContent = gameState.incorrectAttempts;
 
     // Clear the input to make it more obvious it was incorrect
@@ -510,7 +536,7 @@ document.addEventListener('DOMContentLoaded', function () {
       // Show new problem after briefly showing the answer
       setTimeout(newProblem, 1500);
     } else {
-      elements.message.textContent = `間違いました！ ✖`;
+      elements.message.textContent = '間違いました！ ✖';
       elements.message.className = 'message incorrect';
       // Flash the problem to make it more noticeable
       elements.problem.classList.add('shake-animation');
@@ -530,12 +556,12 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('startGame called');
     console.log('Current gameMode before start:', gameState.gameMode);
     console.log('Active operation button:', document.querySelector('.operation-btn.active')?.id);
-    
+
     // Save current mode and difficulty
     // Make sure to check active button as well in case gameState is out of sync
     const activeButtonId = document.querySelector('.operation-btn.active')?.id;
     let currentMode = gameState.gameMode;
-    
+
     // If there's a mismatch, trust the UI (active button) over the state
     if (activeButtonId && currentMode !== activeButtonId) {
       console.log('MISMATCH DETECTED at game start!');
@@ -543,7 +569,7 @@ document.addEventListener('DOMContentLoaded', function () {
       console.log('Using active button ID as the correct mode');
       currentMode = activeButtonId;
     }
-    
+
     const currentDifficulty = gameState.difficulty;
     console.log('Saved mode before reset:', currentMode);
 
@@ -558,40 +584,40 @@ document.addEventListener('DOMContentLoaded', function () {
       timeLeft: 180,
       gameActive: true,
       incorrectProblems: [],
-      currentProblem: {}
+      currentProblem: {},
     };
-    
+
     console.log('Game state after reset:', gameState);
     console.log('Game mode after reset:', gameState.gameMode);
-    
+
     // Update UI
     elements.score.textContent = '0';
     elements.incorrect.textContent = '0';
     elements.timer.classList.remove('time-warning');
     elements.timer.textContent = '3:00';
-    
+
     // Update button state
     elements.startBtn.textContent = 'Running';
     elements.startBtn.classList.add('disabled');
 
     // Enable inputs
     setControlsEnabled(true);
-    
+
     // Reset input state
     elements.answerDisplay.textContent = '';
     elements.message.textContent = '';
     elements.message.className = 'message';
     elements.check.disabled = true;
-    
+
     // Generate a problem based on the selected mode and difficulty
     console.log('Generating problem for mode:', gameState.gameMode);
     newProblem();
-    
+
     // Start timer
     console.log('Starting timer');
     updateTimer();
     gameState.timerInterval = setInterval(updateTimer, 1000);
-    
+
     console.log('Game started!');
   }
 
@@ -599,6 +625,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Clear any running timer
     if (gameState.timerInterval) {
       clearInterval(gameState.timerInterval);
+      // Remove the reference to prevent accidental timer restart
+      gameState.timerInterval = null;
     }
 
     // Reset game state completely with default values
@@ -606,6 +634,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Override with UI defaults
     gameState = updateGameMode(gameState, 'mixed');
     gameState = updateDifficulty(gameState, 'medium');
+
+    // Ensure gameActive is false to prevent timer from starting
+    gameState.gameActive = false;
 
     // Update UI
     elements.score.textContent = '0';
@@ -651,11 +682,24 @@ document.addEventListener('DOMContentLoaded', function () {
     elements.difficultyButtons.forEach(btn => {
       btn.disabled = false;
     });
+
+    // Additional check to ensure no timer is running
+    if (gameState.timerInterval) {
+      console.warn('Timer still exists after reset - clearing again');
+      clearInterval(gameState.timerInterval);
+      gameState.timerInterval = null;
+    }
   }
 
   function endGame() {
-    clearInterval(gameState.timerInterval);
+    // First set game to inactive
     gameState.gameActive = false;
+
+    // Clear any running timer
+    if (gameState.timerInterval) {
+      clearInterval(gameState.timerInterval);
+      gameState.timerInterval = null;
+    }
 
     // Disable inputs
     setControlsEnabled(false);
@@ -699,7 +743,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function createIncorrectProblemsHTML() {
-    let html = `<h3>Problems to Practice:</h3><div class="incorrect-problems">`;
+    let html = '<h3>Problems to Practice:</h3><div class="incorrect-problems">';
 
     // Get unique problems using the module function
     const uniqueProblems = getUniqueIncorrectProblems(gameState);
@@ -724,8 +768,25 @@ document.addEventListener('DOMContentLoaded', function () {
   // 1. Modify timeLeft initial value in gameState
   // 2. Adjust updateTimer for different timing behavior
   function updateTimer() {
-    console.log('updateTimer called, gameActive:', gameState.gameActive, 'timeLeft:', gameState.timeLeft);
-    
+    console.log(
+      'updateTimer called, gameActive:',
+      gameState.gameActive,
+      'timeLeft:',
+      gameState.timeLeft
+    );
+
+    // Only update if the game is active
+    if (!gameState.gameActive) {
+      console.log('Game not active, skipping timer update');
+      // Clear the interval if game is not active to ensure timer stops
+      if (gameState.timerInterval) {
+        console.log('Clearing timer interval because game is not active');
+        clearInterval(gameState.timerInterval);
+        gameState.timerInterval = null;
+      }
+      return;
+    }
+
     // Format time (simple implementation without the utility function)
     const minutes = Math.floor(gameState.timeLeft / 60);
     const seconds = gameState.timeLeft % 60;
@@ -759,13 +820,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Get the button ID and dump ALL operation buttons to check them
     console.log('OPERATION CLICK - All operation buttons:');
     elements.operationButtons.forEach(btn => {
-      console.log(`Button: id=${btn.id}, text="${btn.textContent}", classList=${btn.classList.toString()}`);
+      console.log(
+        `Button: id=${btn.id}, text="${btn.textContent}", classList=${btn.classList.toString()}`
+      );
     });
-    
+
     // Verify this button
     console.log('Clicked button:', this);
     console.log('Setting game mode to:', this.id);
-    
+
     // Update game mode using the module function
     gameState = updateGameMode(gameState, this.id);
     console.log('Updated game state:', gameState);
@@ -778,7 +841,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Update waiting message
     elements.problem.innerHTML = '<p class="waiting-message">Press Start to begin</p>';
-    
+
     // Debug: log ALL DOM elements with id=threeNumber
     console.log('Finding all elements with id=threeNumber:');
     const threeNumberEls = document.querySelectorAll('#threeNumber');
