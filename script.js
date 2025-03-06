@@ -358,9 +358,44 @@ document.addEventListener('DOMContentLoaded', function () {
         
         console.log(`Generated three numbers: ${num1}, ${num2}, ${num3}`);
         
-        // Always create a simple a + b + c problem
-        const question = `${num1} + ${num2} + ${num3} = ?`;
-        const answer = num1 + num2 + num3;
+        // Randomly choose a problem type (1-3) just like in problemGenerator.js
+        const problemType = Math.floor(Math.random() * 3) + 1;
+        console.log('Selected problem type:', problemType);
+        
+        let question, answer;
+        
+        switch (problemType) {
+          case 1: // a + b + c
+            question = `${num1} + ${num2} + ${num3} = ?`;
+            answer = num1 + num2 + num3;
+            break;
+            
+          case 2: // a + b - c
+            // Make sure sum of first two numbers is greater than third to avoid negative results
+            if (num1 + num2 <= num3) {
+              // Adjust num3 to be smaller than num1 + num2
+              const adjustedNum3 = Math.min(num3, num1 + num2 - 1);
+              question = `${num1} + ${num2} - ${adjustedNum3} = ?`;
+              answer = num1 + num2 - adjustedNum3;
+            } else {
+              question = `${num1} + ${num2} - ${num3} = ?`;
+              answer = num1 + num2 - num3;
+            }
+            break;
+            
+          case 3: // a - b + c
+            // Ensure a > b to avoid negative intermediate results
+            if (num1 <= num2) {
+              // If num1 is too small, swap num1 and num2 or use a safe value for num2
+              const safeNum2 = Math.min(num2, num1 - 1 > 0 ? num1 - 1 : 1);
+              question = `${num1} - ${safeNum2} + ${num3} = ?`;
+              answer = num1 - safeNum2 + num3;
+            } else {
+              question = `${num1} - ${num2} + ${num3} = ?`;
+              answer = num1 - num2 + num3;
+            }
+            break;
+        }
         
         // Create the problem object
         problem = {
@@ -374,9 +409,28 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('Manually created problem:', problem);
       } catch (error) {
         console.error('Error creating three-number problem:', error);
-        // Fall back to regular problem generation
-        console.log('Falling back to generateProblemByMode');
-        problem = generateProblemByMode(activeDifficulty, difficultySettings, gameState.gameMode);
+        // IMPORTANT: Since we need 3 numbers, we must NOT fall back to regular generation
+        // Instead, create a simple a + b + c problem as a reliable fallback
+        console.log('Creating simple a + b + c fallback problem');
+        
+        const settings = difficultySettings.threeNumber[activeDifficulty] || {
+          min1: 1, max1: 10, min2: 1, max2: 5, min3: 1, max3: 5
+        };
+        
+        const num1 = Math.floor(Math.random() * (settings.max1 - settings.min1 + 1)) + settings.min1;
+        const num2 = Math.floor(Math.random() * (settings.max2 - settings.min2 + 1)) + settings.min2;
+        const num3 = Math.floor(Math.random() * (settings.max3 - settings.min3 + 1)) + settings.min3;
+        
+        const question = `${num1} + ${num2} + ${num3} = ?`;
+        const answer = num1 + num2 + num3;
+        
+        problem = {
+          originalQuestion: question,
+          question: question,
+          answer: answer,
+          type: 'threeNumber',
+          sourceMode: 'threeNumber (fallback)'
+        };
       }
     } else {
       // Normal flow for other modes

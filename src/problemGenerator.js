@@ -207,8 +207,31 @@ export function generateProblemByMode(
         console.log('Successfully generated threeNumber problem:', problem);
       } catch (err) {
         console.error('ERROR generating threeNumber problem:', err);
-        // Fallback to addition as emergency measure
-        problem = generators.addition(difficulty, difficultySettings);
+        // Create a simple three-number problem as fallback
+        // DO NOT fallback to addition - this would make a two-number problem
+        
+        // Get the settings or use defaults
+        const settings = difficultySettings.threeNumber && difficultySettings.threeNumber[difficulty] ? 
+          difficultySettings.threeNumber[difficulty] : 
+          { min1: 1, max1: 10, min2: 1, max2: 5, min3: 1, max3: 5 };
+        
+        // Generate three random numbers
+        const getRandomNum = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const num1 = getRandomNum(settings.min1, settings.max1);
+        const num2 = getRandomNum(settings.min2, settings.max2);
+        const num3 = getRandomNum(settings.min3, settings.max3);
+        
+        // Create a simple a + b + c problem
+        const question = `${num1} + ${num2} + ${num3} = ?`;
+        
+        problem = {
+          originalQuestion: question,
+          question: question,
+          answer: num1 + num2 + num3,
+          type: 'threeNumber'
+        };
+        
+        console.log('Created fallback three-number problem:', problem);
       }
       break;
 
