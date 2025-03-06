@@ -141,3 +141,16 @@ export function updateDifficulty(state, difficulty) {
     difficulty,
   };
 }
+
+/**
+ * Set game to active state
+ * @param {Object} state - Current game state
+ * @param {boolean} isActive - Whether the game should be active
+ * @return {Object} Updated game state
+ */
+export function setGameActive(state, isActive = true) {
+  return {
+    ...state,
+    gameActive: isActive,
+  };
+}

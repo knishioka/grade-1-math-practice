@@ -10,6 +10,7 @@ import {
   recordIncorrectProblem,
   getUniqueIncorrectProblems,
   calculateAccuracy,
+  setGameActive,
 } from '../src/gameState';
 
 describe('Game State Management', () => {
@@ -133,6 +134,25 @@ describe('Game State Management', () => {
 
       const accuracy = calculateAccuracy(gameState);
       expect(accuracy).toBe(100);
+    });
+  });
+
+  describe('setGameActive', () => {
+    test('activates the game', () => {
+      expect(gameState.gameActive).toBe(false);
+
+      const newState = setGameActive(gameState);
+      expect(newState.gameActive).toBe(true);
+    });
+
+    test('deactivates the game when false is passed', () => {
+      // First activate the game
+      gameState = setGameActive(gameState);
+      expect(gameState.gameActive).toBe(true);
+
+      // Then deactivate it
+      const newState = setGameActive(gameState, false);
+      expect(newState.gameActive).toBe(false);
     });
   });
 });
