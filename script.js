@@ -188,6 +188,12 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('Initializing app...');
     console.log('Elements:', elements);
     
+    // Check all operation buttons
+    console.log('Checking all operation buttons at initialization:');
+    elements.operationButtons.forEach(btn => {
+      console.log(`Operation button: id=${btn.id}, text="${btn.textContent}", classList=${btn.classList.toString()}`);
+    });
+    
     // Set initial display
     elements.problem.innerHTML = '<p class="waiting-message">Press Start to begin</p>';
     if (elements.modeDisplay) {
@@ -199,6 +205,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Update active buttons
     updateDefaultActiveButtons();
+    
+    // Log active operation button after defaults are set
+    console.log('Active operation button after defaults:', document.querySelector('.operation-btn.active')?.id);
+    console.log('Initial game mode:', gameState.gameMode);
 
     // Add event listeners
     attachEventListeners();
@@ -315,8 +325,18 @@ document.addEventListener('DOMContentLoaded', function () {
     // Preserve gameActive status after updateCurrentProblem
     gameState.gameActive = true;
 
-    // Display problem
+    // Display problem and add debug information to DOM
     elements.problem.innerHTML = gameState.currentProblem.question;
+    
+    // Add debug info (only during development)
+    if (gameState.currentProblem.sourceMode) {
+      const debugInfo = document.createElement('div');
+      debugInfo.style.fontSize = '10px';
+      debugInfo.style.color = '#999';
+      debugInfo.style.marginTop = '10px';
+      debugInfo.textContent = `Debug: Generated from ${gameState.currentProblem.sourceMode} mode`;
+      elements.problem.appendChild(debugInfo);
+    }
   }
 
   // ===================================
@@ -606,8 +626,17 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    // Update game mode using the module function
+    // Get the button ID and dump ALL operation buttons to check them
+    console.log('OPERATION CLICK - All operation buttons:');
+    elements.operationButtons.forEach(btn => {
+      console.log(`Button: id=${btn.id}, text="${btn.textContent}", classList=${btn.classList.toString()}`);
+    });
+    
+    // Verify this button
+    console.log('Clicked button:', this);
     console.log('Setting game mode to:', this.id);
+    
+    // Update game mode using the module function
     gameState = updateGameMode(gameState, this.id);
     console.log('Updated game state:', gameState);
 
@@ -619,6 +648,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Update waiting message
     elements.problem.innerHTML = '<p class="waiting-message">Press Start to begin</p>';
+    
+    // Debug: log ALL DOM elements with id=threeNumber
+    console.log('Finding all elements with id=threeNumber:');
+    const threeNumberEls = document.querySelectorAll('#threeNumber');
+    console.log('Found', threeNumberEls.length, 'elements with id=threeNumber:');
+    threeNumberEls.forEach((el, i) => {
+      console.log(`Element ${i}:`, el);
+    });
   }
 
   function handleDifficultyButtonClick() {
