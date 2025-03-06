@@ -301,6 +301,17 @@ document.addEventListener('DOMContentLoaded', function () {
     
     // Log current game mode again before generating problem
     console.log('Current gameMode in newProblem:', gameState.gameMode, 'active button:', document.querySelector('.operation-btn.active')?.id);
+    console.log('Game state object:', JSON.stringify(gameState));
+    
+    // CRITICAL FIX: Make sure gameMode matches the active button
+    // This ensures UI and state are in sync
+    const activeButtonId = document.querySelector('.operation-btn.active')?.id;
+    if (activeButtonId && gameState.gameMode !== activeButtonId) {
+      console.log('CRITICAL ERROR: Game mode mismatch detected!');
+      console.log(`Active button is ${activeButtonId} but gameState.gameMode is ${gameState.gameMode}`);
+      console.log('Fixing by updating gameState.gameMode to match active button');
+      gameState.gameMode = activeButtonId;
+    }
     
     // Reset input and messages
     elements.answerDisplay.textContent = '';
@@ -413,7 +424,18 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('Active operation button:', document.querySelector('.operation-btn.active')?.id);
     
     // Save current mode and difficulty
-    const currentMode = gameState.gameMode;
+    // Make sure to check active button as well in case gameState is out of sync
+    const activeButtonId = document.querySelector('.operation-btn.active')?.id;
+    let currentMode = gameState.gameMode;
+    
+    // If there's a mismatch, trust the UI (active button) over the state
+    if (activeButtonId && currentMode !== activeButtonId) {
+      console.log('MISMATCH DETECTED at game start!');
+      console.log(`Active button is ${activeButtonId} but gameState.gameMode is ${currentMode}`);
+      console.log('Using active button ID as the correct mode');
+      currentMode = activeButtonId;
+    }
+    
     const currentDifficulty = gameState.difficulty;
     console.log('Saved mode before reset:', currentMode);
 
