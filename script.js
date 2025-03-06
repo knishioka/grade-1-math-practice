@@ -69,19 +69,10 @@ import {
 
 import { getRandomDifficulty, formatTime } from '/src/utils.js';
 
-// グローバル関数としてゲーム開始関数を定義
-window.gameStart = function () {
-  console.log('Global gameStart function called!');
-  const event = new Event('startGame');
-  document.dispatchEvent(event);
-};
+// Note: We've removed the global gameStart function and custom event listeners
+// since they were causing duplicate timer execution
 
 document.addEventListener('DOMContentLoaded', function () {
-  // カスタムイベントを追加
-  document.addEventListener('startGame', function () {
-    console.log('Start game event received!');
-    startGame();
-  });
   // ===================================
   // STATE VARIABLES
   // ===================================
@@ -219,16 +210,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Add event listeners
     attachEventListeners();
 
-    // Add direct listener to start button again for redundancy
-    if (elements.startBtn) {
-      console.log('Adding direct click listener to start button');
-      elements.startBtn.addEventListener('click', function () {
-        console.log('Start button clicked directly!');
-        startGame();
-      });
-    } else {
-      console.error('Start button not found!');
-    }
+    // Note: We no longer add a redundant listener to the start button
+    // as it was causing the timer to run twice as fast
 
     // Disable interactive elements initially
     setControlsEnabled(false);
