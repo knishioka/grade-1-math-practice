@@ -61,7 +61,10 @@ import {
 
 import { 
   generateProblemByMode, 
-  updateCurrentProblem
+  updateCurrentProblem,
+  generateThreeNumberProblem, // <-- Add direct import for three number problems
+  generateAdditionProblem,
+  generateSubtractionProblem
 } from './src/problemGenerator.js';
 
 import { 
@@ -336,10 +339,45 @@ document.addEventListener('DOMContentLoaded', function () {
     // Ensure we're actually calling the intended generator
     let problem;
     if (gameState.gameMode === 'threeNumber') {
-      // Force three number problem generation directly
-      console.log('DIRECT CALL to generateThreeNumberProblem');
-      problem = generateThreeNumberProblem(activeDifficulty, difficultySettings);
-      console.log('Generated problem directly:', problem);
+      try {
+        // Force three number problem generation - manually create a problem with 3 numbers
+        console.log('Manually creating a three-number problem');
+        
+        // Lookup difficulty settings
+        const settings = difficultySettings.threeNumber[activeDifficulty];
+        console.log('Using settings:', settings);
+        
+        if (!settings) {
+          throw new Error('No settings found for threeNumber difficulty: ' + activeDifficulty);
+        }
+        
+        // Generate three random numbers based on the settings
+        const num1 = Math.floor(Math.random() * (settings.max1 - settings.min1 + 1)) + settings.min1;
+        const num2 = Math.floor(Math.random() * (settings.max2 - settings.min2 + 1)) + settings.min2;
+        const num3 = Math.floor(Math.random() * (settings.max3 - settings.min3 + 1)) + settings.min3;
+        
+        console.log(`Generated three numbers: ${num1}, ${num2}, ${num3}`);
+        
+        // Always create a simple a + b + c problem
+        const question = `${num1} + ${num2} + ${num3} = ?`;
+        const answer = num1 + num2 + num3;
+        
+        // Create the problem object
+        problem = {
+          originalQuestion: question,
+          question: question,
+          answer: answer,
+          type: 'threeNumber',
+          sourceMode: 'threeNumber'
+        };
+        
+        console.log('Manually created problem:', problem);
+      } catch (error) {
+        console.error('Error creating three-number problem:', error);
+        // Fall back to regular problem generation
+        console.log('Falling back to generateProblemByMode');
+        problem = generateProblemByMode(activeDifficulty, difficultySettings, gameState.gameMode);
+      }
     } else {
       // Normal flow for other modes
       problem = generateProblemByMode(activeDifficulty, difficultySettings, gameState.gameMode);
