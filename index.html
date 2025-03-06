@@ -62,6 +62,608 @@
         <div id="difficulty-locked-message" class="hidden">Difficulty locked during game</div>
       </div>
     </div>
-    <script src="script.js" type="module"></script>
+    
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // ===================================
+        // STATE VARIABLES
+        // ===================================
+        let gameState = {
+          gameMode: 'mixed',
+          difficulty: 'medium',
+          currentProblem: {},
+          score: 0,
+          incorrectAttempts: 0,
+          currentProblemAttempts: 0,
+          timeLeft: 180, // 3 minutes in seconds
+          gameActive: false,
+          incorrectProblems: [],
+          timerInterval: null
+        };
+
+        // ===================================
+        // DOM ELEMENTS
+        // ===================================
+        const elements = {
+          problem: document.getElementById('problem'),
+          answerDisplay: document.getElementById('answer-display'),
+          check: document.getElementById('check'),
+          message: document.getElementById('message'),
+          score: document.getElementById('score'),
+          incorrect: document.getElementById('incorrect'),
+          operationButtons: document.querySelectorAll('.operation-btn'),
+          timer: document.getElementById('timer'),
+          startBtn: document.getElementById('start-btn'),
+          resetBtn: document.getElementById('reset-btn'),
+          difficultyDisplay: document.getElementById('current-difficulty-display'),
+          modeDisplay: document.getElementById('current-mode-display'),
+          difficultyButtons: document.querySelectorAll('.difficulty-btn'),
+          numberButtons: document.querySelectorAll('.num-btn'),
+          clearButton: document.getElementById('clear-btn'),
+        };
+
+        // ===================================
+        // DIFFICULTY SETTINGS
+        // ===================================
+        const difficultySettings = {
+          addition: {
+            easy: { min1: 1, max1: 10, min2: 1, max2: 10 },
+            medium: { min1: 1, max1: 20, min2: 1, max2: 20 },
+            hard: { min1: 10, max1: 50, min2: 10, max2: 50 },
+          },
+          subtraction: {
+            easy: { min1: 1, max1: 10, min2: 1, max2: 10 },
+            medium: { min1: 10, max1: 20, min2: 1, max2: 10 },
+            hard: { min1: 20, max1: 100, min2: 1, max2: 20 },
+          },
+          mixed: {
+            easy: { min1: 1, max1: 10, min2: 1, max2: 10 },
+            medium: { min1: 1, max1: 20, min2: 1, max2: 20 },
+            hard: { min1: 10, max1: 50, min2: 1, max2: 25 },
+          },
+          counting: {
+            easy: { min: 5, max: 10 },
+            medium: { min: 10, max: 20 },
+            hard: { min: 15, max: 30 },
+          },
+        };
+
+        // ===================================
+        // UTILITY FUNCTIONS
+        // ===================================
+        function getRandomNumber(min, max) {
+          return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function getRandomDifficulty() {
+          const difficulties = ['medium', 'hard'];
+          return difficulties[Math.floor(Math.random() * difficulties.length)];
+        }
+
+        function formatTime(seconds) {
+          const minutes = Math.floor(seconds / 60);
+          const remainingSeconds = seconds % 60;
+          return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+        }
+
+        // ===================================
+        // PROBLEM GENERATION
+        // ===================================
+        function generateAdditionProblem(difficulty) {
+          const settings = difficultySettings.addition[difficulty];
+          const num1 = getRandomNumber(settings.min1, settings.max1);
+          const num2 = getRandomNumber(settings.min2, settings.max2);
+
+          return {
+            originalQuestion: `${num1} + ${num2} = ?`,
+            question: `${num1} + ${num2} = ?`,
+            answer: num1 + num2,
+          };
+        }
+
+        function generateSubtractionProblem(difficulty) {
+          const settings = difficultySettings.subtraction[difficulty];
+          const num1 = getRandomNumber(settings.min1, settings.max1);
+          const num2 = getRandomNumber(settings.min2, Math.min(settings.max2, num1));
+
+          return {
+            originalQuestion: `${num1} - ${num2} = ?`,
+            question: `${num1} - ${num2} = ?`,
+            answer: num1 - num2,
+          };
+        }
+
+        function generateCountingProblem(difficulty) {
+          const settings = difficultySettings.counting[difficulty];
+          const count = getRandomNumber(settings.min, settings.max);
+          const emojis = ['🍎', '🍕', '🐶', '🐱', '🦄', '🍦', '🚗', '🌈', '⭐'];
+          const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+          let emojiString = '';
+          for (let i = 0; i < count; i++) {
+            emojiString += randomEmoji + ' ';
+            if (difficulty !== 'easy' && i % 5 === 4) {
+              emojiString += '<br>';
+            }
+          }
+
+          const countingQuestion = `How many ${randomEmoji}?<br>${emojiString}`;
+          return {
+            originalQuestion: countingQuestion,
+            question: countingQuestion,
+            answer: count,
+          };
+        }
+
+        function generateProblemByMode(difficulty, gameMode) {
+          switch (gameMode) {
+            case 'addition':
+              return generateAdditionProblem(difficulty);
+            case 'subtraction':
+              return generateSubtractionProblem(difficulty);
+            case 'mixed':
+              return Math.random() < 0.5
+                ? generateAdditionProblem(difficulty)
+                : generateSubtractionProblem(difficulty);
+            case 'counting':
+              return generateCountingProblem(difficulty);
+            default:
+              return generateAdditionProblem(difficulty);
+          }
+        }
+
+        // ===================================
+        // GAME FUNCTIONS
+        // ===================================
+        function newProblem() {
+          // Reset input and messages
+          elements.answerDisplay.textContent = '';
+          elements.message.textContent = '';
+          elements.message.className = 'message';
+          
+          // Reset attempt counter
+          gameState.currentProblemAttempts = 0;
+
+          // Disable check button until an answer is entered
+          elements.check.disabled = true;
+
+          // For mixed difficulty, randomly choose medium or hard
+          let activeDifficulty = gameState.difficulty;
+          if (gameState.difficulty === 'mixed-difficulty') {
+            activeDifficulty = getRandomDifficulty();
+          }
+
+          // Generate problem based on game mode
+          const problem = generateProblemByMode(activeDifficulty, gameState.gameMode);
+          gameState.currentProblem = problem;
+
+          // Display problem
+          elements.problem.innerHTML = gameState.currentProblem.question;
+        }
+
+        function checkAnswer() {
+          const userAnswer = parseInt(elements.answerDisplay.textContent);
+
+          if (isNaN(userAnswer)) {
+            elements.message.textContent = 'Please enter a number!';
+            elements.message.className = 'message incorrect';
+            return;
+          }
+
+          if (userAnswer === gameState.currentProblem.answer) {
+            handleCorrectAnswer();
+          } else {
+            handleIncorrectAnswer();
+          }
+        }
+
+        function handleCorrectAnswer() {
+          elements.message.textContent = 'Correct! 🎉';
+          elements.message.className = 'message correct';
+          gameState.score++;
+          elements.score.textContent = gameState.score;
+          // Show new problem immediately
+          newProblem();
+        }
+
+        function handleIncorrectAnswer() {
+          gameState.incorrectAttempts++;
+          gameState.currentProblemAttempts++;
+          gameState.incorrectProblems.push({
+            question: gameState.currentProblem.question,
+            answer: gameState.currentProblem.answer,
+          });
+          
+          elements.incorrect.textContent = gameState.incorrectAttempts;
+
+          // Clear the input to make it more obvious it was incorrect
+          elements.answerDisplay.textContent = '';
+          elements.check.disabled = true;
+
+          // Show different messages based on number of attempts
+          if (gameState.currentProblemAttempts >= 3) {
+            elements.message.textContent = `The answer is ${gameState.currentProblem.answer}`;
+            elements.message.className = 'message hint';
+            // Show new problem after briefly showing the answer
+            setTimeout(newProblem, 1500);
+          } else {
+            elements.message.textContent = `間違いました！ ✖`;
+            elements.message.className = 'message incorrect';
+            // Flash the problem to make it more noticeable
+            elements.problem.classList.add('shake-animation');
+            setTimeout(() => {
+              elements.problem.classList.remove('shake-animation');
+            }, 500);
+          }
+        }
+
+        function startGame() {
+          console.log('startGame called');
+          
+          if (gameState.gameActive) return;
+          
+          // Reset game state with current mode and difficulty
+          gameState.score = 0;
+          gameState.incorrectAttempts = 0;
+          gameState.currentProblemAttempts = 0;
+          gameState.timeLeft = 180;
+          gameState.gameActive = true;
+          gameState.incorrectProblems = [];
+          
+          console.log('Game state after reset:', gameState);
+          
+          // Update UI
+          elements.score.textContent = '0';
+          elements.incorrect.textContent = '0';
+          elements.timer.classList.remove('time-warning');
+          elements.timer.textContent = '3:00';
+          
+          // Update button state
+          elements.startBtn.textContent = 'Running';
+          elements.startBtn.classList.add('disabled');
+
+          // Enable inputs
+          setControlsEnabled(true);
+          
+          // Generate first problem
+          newProblem();
+          
+          // Start timer
+          console.log('Starting timer');
+          updateTimer();
+          gameState.timerInterval = setInterval(updateTimer, 1000);
+          
+          console.log('Game started!');
+        }
+
+        function resetGame() {
+          // Clear any running timer
+          if (gameState.timerInterval) {
+            clearInterval(gameState.timerInterval);
+          }
+
+          // Reset game state
+          gameState.gameMode = 'mixed';
+          gameState.difficulty = 'medium';
+          gameState.score = 0;
+          gameState.incorrectAttempts = 0;
+          gameState.currentProblemAttempts = 0;
+          gameState.timeLeft = 180;
+          gameState.gameActive = false;
+          gameState.incorrectProblems = [];
+          gameState.currentProblem = {};
+          gameState.timerInterval = null;
+
+          // Update UI
+          elements.score.textContent = '0';
+          elements.incorrect.textContent = '0';
+          elements.timer.textContent = '3:00';
+          elements.timer.classList.remove('time-warning');
+          elements.problem.innerHTML = '<p class="waiting-message">Press Start to begin</p>';
+          elements.message.textContent = '';
+          elements.message.className = 'message';
+          elements.answerDisplay.textContent = '';
+
+          // Reset button state
+          elements.startBtn.textContent = 'Start';
+          elements.startBtn.classList.remove('disabled');
+
+          // Disable inputs
+          setControlsEnabled(false);
+
+          // Reset operation and difficulty buttons
+          updateDefaultActiveButtons();
+
+          // Update display
+          if (elements.modeDisplay) {
+            elements.modeDisplay.textContent = 'Mixed';
+          }
+          if (elements.difficultyDisplay) {
+            elements.difficultyDisplay.textContent = 'Medium';
+          }
+
+          // Show confirmation message
+          elements.message.textContent = 'ゲームをリセットしました。スタートボタンを押して再開してください。';
+          elements.message.className = 'message';
+          elements.message.style.color = '#0984e3';
+
+          // Allow operation and difficulty selection
+          elements.operationButtons.forEach(btn => {
+            btn.disabled = false;
+          });
+
+          elements.difficultyButtons.forEach(btn => {
+            btn.disabled = false;
+          });
+        }
+
+        function endGame() {
+          clearInterval(gameState.timerInterval);
+          gameState.gameActive = false;
+
+          // Disable inputs
+          setControlsEnabled(false);
+
+          // Update UI
+          elements.startBtn.textContent = 'Start Again';
+          elements.startBtn.classList.remove('disabled');
+
+          // Display results
+          showGameResults();
+        }
+
+        function showGameResults() {
+          // Calculate stats
+          const totalAttempts = gameState.score + gameState.incorrectAttempts;
+          const accuracyRate = totalAttempts === 0 ? 0 : Math.round((gameState.score / totalAttempts) * 100);
+
+          // Format difficulty display
+          let difficultyDisplay = gameState.difficulty;
+          if (gameState.difficulty === 'mixed-difficulty') {
+            difficultyDisplay = 'Mixed (Medium-Hard)';
+          }
+
+          // Create results HTML
+          let resultHTML = `
+              <h2>Time's Up!</h2>
+              <p>Your final score: ${gameState.score}</p>
+              <p>Incorrect attempts: ${gameState.incorrectAttempts}</p>
+              <p>Accuracy: ${accuracyRate}%</p>
+              <p>Difficulty: ${difficultyDisplay}</p>
+          `;
+
+          // Add incorrect problems if there were any
+          if (gameState.incorrectProblems.length > 0) {
+            resultHTML += createIncorrectProblemsHTML();
+          }
+
+          // Display results
+          elements.problem.textContent = '';
+          elements.message.innerHTML = resultHTML;
+          elements.message.className = 'message end-message';
+        }
+
+        function createIncorrectProblemsHTML() {
+          let html = `<h3>Problems to Practice:</h3><div class="incorrect-problems">`;
+          
+          // Get unique problems
+          const seen = new Set();
+          const uniqueProblems = [];
+          
+          for (const problem of gameState.incorrectProblems) {
+            const key = problem.question + problem.answer;
+            if (!seen.has(key)) {
+              seen.add(key);
+              uniqueProblems.push(problem);
+            }
+          }
+
+          // Add each problem to the results
+          for (const problem of uniqueProblems) {
+            html += `
+              <div class="problem-item">
+                  <div>${problem.question.replace('= ?', '=')}</div>
+                  <div class="answer">${problem.answer}</div>
+              </div>`;
+          }
+
+          return html + '</div>';
+        }
+
+        function updateTimer() {
+          console.log('updateTimer called, gameActive:', gameState.gameActive, 'timeLeft:', gameState.timeLeft);
+          
+          // Format time
+          const minutes = Math.floor(gameState.timeLeft / 60);
+          const seconds = gameState.timeLeft % 60;
+          elements.timer.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+          if (gameState.timeLeft <= 60) {
+            elements.timer.classList.add('time-warning');
+          }
+
+          if (gameState.timeLeft <= 0) {
+            endGame();
+          } else {
+            gameState.timeLeft--;
+          }
+        }
+
+        // ===================================
+        // UI FUNCTIONS
+        // ===================================
+        function handleOperationButtonClick(e) {
+          if (gameState.gameActive) {
+            document.getElementById('mode-locked-message').classList.remove('hidden');
+            setTimeout(() => {
+              document.getElementById('mode-locked-message').classList.add('hidden');
+            }, 2000);
+            return;
+          }
+
+          // Update game mode
+          gameState.gameMode = e.target.id;
+
+          // Update UI
+          updateOperationButtons(e.target);
+          if (elements.modeDisplay) {
+            elements.modeDisplay.textContent = e.target.textContent;
+          }
+
+          // Update waiting message
+          elements.problem.innerHTML = '<p class="waiting-message">Press Start to begin</p>';
+        }
+
+        function handleDifficultyButtonClick(e) {
+          if (gameState.gameActive) {
+            document.getElementById('difficulty-locked-message').classList.remove('hidden');
+            setTimeout(() => {
+              document.getElementById('difficulty-locked-message').classList.add('hidden');
+            }, 2000);
+            return;
+          }
+
+          // Update difficulty
+          gameState.difficulty = e.target.id;
+
+          // Update UI
+          updateDifficultyButtons(e.target);
+          if (elements.difficultyDisplay) {
+            let displayText = e.target.textContent;
+            if (gameState.difficulty === 'mixed-difficulty') {
+              displayText = 'Mixed (Medium-Hard)';
+            }
+            elements.difficultyDisplay.textContent = displayText;
+          }
+        }
+
+        function checkInputValue() {
+          // Enable/disable check button based on input
+          elements.check.disabled = !elements.answerDisplay.textContent;
+
+          // Update the problem display to show entered number
+          if (gameState.currentProblem.question && gameState.gameActive) {
+            const questionParts = gameState.currentProblem.originalQuestion.split('?');
+            if (questionParts.length === 2) {
+              const displayValue = elements.answerDisplay.textContent || '?';
+              elements.problem.innerHTML = questionParts[0] + displayValue + questionParts[1];
+            }
+          }
+        }
+
+        function setControlsEnabled(enabled) {
+          // Set check button
+          elements.check.disabled = true; // Always start disabled until input
+
+          // Set number buttons
+          elements.numberButtons.forEach(btn => {
+            btn.disabled = !enabled;
+          });
+
+          if (elements.clearButton) {
+            elements.clearButton.disabled = !enabled;
+          }
+        }
+
+        function updateOperationButtons(activeButton) {
+          elements.operationButtons.forEach(btn => {
+            btn.classList.remove('active');
+            btn.classList.add('inactive');
+          });
+          activeButton.classList.remove('inactive');
+          activeButton.classList.add('active');
+        }
+
+        function updateDifficultyButtons(activeButton) {
+          elements.difficultyButtons.forEach(btn => {
+            btn.classList.remove('active');
+          });
+          activeButton.classList.add('active');
+        }
+
+        function updateDefaultActiveButtons() {
+          // Set Mixed as active operation
+          elements.operationButtons.forEach(btn => {
+            btn.classList.remove('active');
+            btn.classList.add('inactive');
+            if (btn.id === 'mixed') {
+              btn.classList.remove('inactive');
+              btn.classList.add('active');
+            }
+          });
+
+          // Set Medium as active difficulty
+          elements.difficultyButtons.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.id === 'medium') {
+              btn.classList.add('active');
+            }
+          });
+        }
+
+        // ===================================
+        // SETUP & INITIALIZATION
+        // ===================================
+        function init() {
+          console.log('Initializing app...');
+          
+          // Set initial display
+          elements.problem.innerHTML = '<p class="waiting-message">Press Start to begin</p>';
+          
+          if (elements.modeDisplay) {
+            elements.modeDisplay.textContent = 'Mixed';
+          }
+          if (elements.difficultyDisplay) {
+            elements.difficultyDisplay.textContent = 'Medium';
+          }
+
+          // Create locked message element
+          const modeLocked = document.createElement('div');
+          modeLocked.id = 'mode-locked-message';
+          modeLocked.className = 'hidden';
+          modeLocked.textContent = 'Operation type locked during game';
+          document.querySelector('.buttons').appendChild(modeLocked);
+
+          // Update active buttons
+          updateDefaultActiveButtons();
+
+          // Attach event listeners
+          elements.startBtn.addEventListener('click', startGame);
+          elements.resetBtn.addEventListener('click', resetGame);
+          elements.check.addEventListener('click', checkAnswer);
+
+          elements.operationButtons.forEach(button => {
+            button.addEventListener('click', handleOperationButtonClick);
+          });
+
+          elements.difficultyButtons.forEach(button => {
+            button.addEventListener('click', handleDifficultyButtonClick);
+          });
+
+          elements.numberButtons.forEach(button => {
+            button.addEventListener('click', () => {
+              const currentAnswer = elements.answerDisplay.textContent || '';
+              elements.answerDisplay.textContent = currentAnswer + button.textContent;
+              checkInputValue();
+            });
+          });
+
+          if (elements.clearButton) {
+            elements.clearButton.addEventListener('click', () => {
+              elements.answerDisplay.textContent = '';
+              checkInputValue();
+            });
+          }
+
+          // Disable interactive elements initially
+          setControlsEnabled(false);
+          
+          console.log('Initialization complete!');
+        }
+
+        // Initialize the app
+        init();
+      });
+    </script>
   </body>
 </html>

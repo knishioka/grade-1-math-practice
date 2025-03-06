@@ -69,7 +69,20 @@ import {
   formatTime
 } from './src/utils.js';
 
+// グローバル関数としてゲーム開始関数を定義
+window.gameStart = function() {
+  console.log('Global gameStart function called!');
+  const event = new Event('startGame');
+  document.dispatchEvent(event);
+};
+
 document.addEventListener('DOMContentLoaded', function () {
+  
+  // カスタムイベントを追加
+  document.addEventListener('startGame', function() {
+    console.log('Start game event received!');
+    startGame();
+  });
   // ===================================
   // STATE VARIABLES
   // ===================================
@@ -167,6 +180,9 @@ document.addEventListener('DOMContentLoaded', function () {
   // The init function is the entry point of the application
   // Separating initialization from execution improves testability
   function init() {
+    console.log('Initializing app...');
+    console.log('Elements:', elements);
+    
     // Set initial display
     elements.problem.innerHTML = '<p class="waiting-message">Press Start to begin</p>';
     if (elements.modeDisplay) {
@@ -181,9 +197,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Add event listeners
     attachEventListeners();
+    
+    // Add direct listener to start button again for redundancy
+    if (elements.startBtn) {
+      console.log('Adding direct click listener to start button');
+      elements.startBtn.addEventListener('click', function() {
+        console.log('Start button clicked directly!');
+        startGame();
+      });
+    } else {
+      console.error('Start button not found!');
+    }
 
     // Disable interactive elements initially
     setControlsEnabled(false);
+    
+    console.log('Initialization complete!');
   }
 
   function updateDefaultActiveButtons() {
@@ -249,6 +278,12 @@ document.addEventListener('DOMContentLoaded', function () {
   // 2. Add to the generateProblemByMode switch statement
   // 3. Ensure consistent problem object structure
   function newProblem() {
+    // Ensure gameActive is true when generating a new problem
+    if (!gameState.gameActive) {
+      console.log('newProblem called but game not active - fixing');
+      gameState.gameActive = true;
+    }
+    
     // Reset input and messages
     elements.answerDisplay.textContent = '';
     elements.message.textContent = '';
@@ -266,6 +301,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Generate problem based on game mode and update the game state
     const problem = generateProblemByMode(activeDifficulty, difficultySettings, gameState.gameMode);
     gameState = updateCurrentProblem(gameState, problem);
+    
+    // Preserve gameActive status after updateCurrentProblem
+    gameState.gameActive = true;
 
     // Display problem
     elements.problem.innerHTML = gameState.currentProblem.question;
@@ -278,7 +316,9 @@ document.addEventListener('DOMContentLoaded', function () {
   // Handles both correct and incorrect responses
   // To add new response behaviors, modify these functions
   function checkAnswer() {
+    console.log('checkAnswer called');
     const userAnswer = parseInt(elements.answerDisplay.textContent);
+    console.log('User answer:', userAnswer, 'Correct answer:', gameState.currentProblem.answer);
 
     if (isNaN(userAnswer)) {
       elements.message.textContent = 'Please enter a number!';
@@ -338,27 +378,60 @@ document.addEventListener('DOMContentLoaded', function () {
   // These functions manage game state transitions
   // When adding new game features, consider their lifecycle integration
   function startGame() {
-    if (gameState.gameActive) return;
-
-    // Reset game state with current mode and difficulty
-    gameState = resetGameState(gameState);
-
+    console.log('startGame called');
+    
+    // Initialize a fresh game state and manually set gameActive
+    // Don't use resetGameState for now to eliminate any potential issues
+    gameState = {
+      ...gameState,
+      score: 0,
+      incorrectAttempts: 0,
+      currentProblemAttempts: 0,
+      timeLeft: 180,
+      gameActive: true,
+      incorrectProblems: [],
+      currentProblem: {}
+    };
+    
+    console.log('Game state after reset:', gameState);
+    
     // Update UI
     elements.score.textContent = '0';
     elements.incorrect.textContent = '0';
     elements.timer.classList.remove('time-warning');
-    updateTimer();
-
+    elements.timer.textContent = '3:00';
+    
     // Update button state
     elements.startBtn.textContent = 'Running';
     elements.startBtn.classList.add('disabled');
 
     // Enable inputs
     setControlsEnabled(true);
-
-    // Start timer and first problem
+    
+    // Manually generate a problem
+    elements.answerDisplay.textContent = '';
+    elements.message.textContent = '';
+    elements.message.className = 'message';
+    elements.check.disabled = true;
+    
+    // Generate a simple addition problem directly - bypass the complex logic for now
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    const problem = {
+      originalQuestion: `${num1} + ${num2} = ?`,
+      question: `${num1} + ${num2} = ?`,
+      answer: num1 + num2
+    };
+    
+    gameState.currentProblem = problem;
+    elements.problem.innerHTML = problem.question;
+    
+    // Start timer
+    console.log('Starting timer');
+    updateTimer();
     gameState.timerInterval = setInterval(updateTimer, 1000);
-    newProblem();
+    
+    console.log('Game started!');
   }
 
   function resetGame() {
@@ -490,7 +563,12 @@ document.addEventListener('DOMContentLoaded', function () {
   // 1. Modify timeLeft initial value in gameState
   // 2. Adjust updateTimer for different timing behavior
   function updateTimer() {
-    elements.timer.textContent = formatTime(gameState.timeLeft);
+    console.log('updateTimer called, gameActive:', gameState.gameActive, 'timeLeft:', gameState.timeLeft);
+    
+    // Format time (simple implementation without the utility function)
+    const minutes = Math.floor(gameState.timeLeft / 60);
+    const seconds = gameState.timeLeft % 60;
+    elements.timer.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 
     if (gameState.timeLeft <= 60) {
       elements.timer.classList.add('time-warning');
