@@ -615,7 +615,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Start timer
     console.log('Starting timer');
-    updateTimer();
+    // Set initial time display (don't update time yet)
+    elements.timer.textContent = formatTime(gameState.timeLeft);
+    // Start interval for timer updates
     gameState.timerInterval = setInterval(updateTimer, 1000);
 
     console.log('Game started!');
@@ -641,7 +643,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Update UI
     elements.score.textContent = '0';
     elements.incorrect.textContent = '0';
-    elements.timer.textContent = '3:00';
+    elements.timer.textContent = formatTime(gameState.timeLeft);
     elements.timer.classList.remove('time-warning');
     elements.problem.innerHTML = '<p class="waiting-message">Press Start to begin</p>';
     elements.message.textContent = '';
@@ -787,20 +789,23 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    // Format time (simple implementation without the utility function)
-    const minutes = Math.floor(gameState.timeLeft / 60);
-    const seconds = gameState.timeLeft % 60;
-    elements.timer.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    // Check if the game should end
+    if (gameState.timeLeft <= 0) {
+      endGame();
+      return;
+    }
 
+    // First update the display with the current time value
+    // Use the formatTime utility for consistent time formatting
+    elements.timer.textContent = formatTime(gameState.timeLeft);
+
+    // Add warning class when 60 seconds or less remaining
     if (gameState.timeLeft <= 60) {
       elements.timer.classList.add('time-warning');
     }
 
-    if (gameState.timeLeft <= 0) {
-      endGame();
-    } else {
-      gameState.timeLeft--;
-    }
+    // Then decrement the timeLeft counter for the next update
+    gameState.timeLeft--;
   }
 
   // ===================================
