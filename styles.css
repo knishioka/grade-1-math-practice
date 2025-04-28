@@ -13,6 +13,28 @@ body {
   border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
+  position: relative;
+}
+
+.language-selector {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+}
+
+.language-selector select {
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background-color: white;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.language-selector select:hover {
+  border-color: #a29bfe;
 }
 
 h1 {
@@ -276,6 +298,7 @@ button:disabled {
 .buttons {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 15px;
   margin-top: 20px;
   position: relative;
@@ -284,6 +307,7 @@ button:disabled {
 
 .operation-btn {
   position: relative;
+  margin-bottom: 5px;
 }
 
 .operation-btn.active {
@@ -379,6 +403,7 @@ button:disabled {
 .difficulty-buttons {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
@@ -388,6 +413,7 @@ button:disabled {
   background-color: #74b9ff;
   opacity: 0.7;
   transition: all 0.3s ease;
+  margin-bottom: 5px;
 }
 
 .difficulty-btn:hover {
@@ -458,4 +484,42 @@ button:disabled {
 
 #clear-btn:hover {
   background-color: #ee5253;
+}
+
+/* レスポンシブ対応の追加 */
+@media (max-width: 640px) {
+  .container {
+    margin: 20px auto;
+    padding: 15px;
+  }
+  
+  .language-selector {
+    position: relative;
+    top: 0;
+    right: 0;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  h1 {
+    font-size: 24px;
+  }
+  
+  #problem {
+    font-size: 32px;
+  }
+  
+  .buttons {
+    flex-wrap: wrap;
+  }
+  
+  .operation-btn {
+    width: calc(50% - 15px);
+    margin-bottom: 10px;
+  }
+  
+  .difficulty-buttons {
+    flex-wrap: wrap;
+  }
 }
