@@ -1,0 +1,49 @@
+{
+  "app": {
+    "title": "Grade 1 Math Practice",
+    "timer": {
+      "label": "Timer",
+      "lockedMessage": "Timer locked during game"
+    },
+    "buttons": {
+      "start": "Start",
+      "reset": "Reset",
+      "check": "Check"
+    },
+    "operations": {
+      "addition": "Addition",
+      "subtraction": "Subtraction",
+      "threeNumber": "3 Numbers",
+      "mixed": "Mixed",
+      "counting": "Counting"
+    },
+    "difficulty": {
+      "label": "Select Difficulty Level:",
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard",
+      "mixed": "Mixed",
+      "lockedMessage": "Difficulty locked during game"
+    },
+    "gameplay": {
+      "score": "Score",
+      "incorrect": "Incorrect",
+      "waitingMessage": "Press Start to begin",
+      "correctAnswer": "Correct! 🎉",
+      "incorrectAnswer": "Incorrect! ✖",
+      "countingQuestion": "How many"
+    },
+    "results": {
+      "timeUp": "Time's Up!",
+      "finalScore": "Your final score",
+      "incorrectAttempts": "Incorrect attempts",
+      "accuracy": "Accuracy",
+      "difficulty": "Difficulty",
+      "problemsToPractice": "Problems to Practice"
+    },
+    "messages": {
+      "resetConfirmation": "Game has been reset. Press Start to begin again.",
+      "enterNumber": "Please enter a number!"
+    }
+  }
+}
