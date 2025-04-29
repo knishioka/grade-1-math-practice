@@ -1,0 +1,49 @@
+{
+  "app": {
+    "title": "一年级数学练习",
+    "timer": {
+      "label": "计时器",
+      "lockedMessage": "计时器在局内被锁定"
+    },
+    "buttons": {
+      "start": "开始",
+      "reset": "重置",
+      "check": "检查"
+    },
+    "operations": {
+      "addition": "加",
+      "subtraction": "减",
+      "threeNumber": "3 数",
+      "mixed": "混合",
+      "counting": "计数"
+    },
+    "difficulty": {
+      "label": "选择难度:",
+      "easy": "简单",
+      "medium": "中等",
+      "hard": "困难",
+      "mixed": "混合",
+      "lockedMessage": "难度在局内被锁定"
+    },
+    "gameplay": {
+      "score": "分数",
+      "incorrect": "错误",
+      "waitingMessage": "点击开始按钮",
+      "correctAnswer": "正确! 🎉",
+      "incorrectAnswer": "错误! ✖",
+      "countingQuestion": "多少"
+    },
+    "results": {
+      "timeUp": "时间到了!",
+      "finalScore": "最终分数",
+      "incorrectAttempts": "错误尝试",
+      "accuracy": "准确性",
+      "difficulty": "难度",
+      "problemsToPractice": "问题练习"
+    },
+    "messages": {
+      "resetConfirmation": "游戏已重置. 按开始按钮重新开始",
+      "enterNumber": "请输入一个数字!"
+    }
+  }
+}
