@@ -71,7 +71,7 @@ import { getRandomDifficulty, formatTime } from '/src/utils.js';
 
 // 開発モード判定のためのフラグ
 // 本番環境ではfalseに設定する
-const IS_DEBUG = true;
+const IS_DEBUG = false;
 
 /**
  * デバッグモードのときだけログを出力する
@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // 3. Ensure consistent problem object structure
 
   // 開発モード判定のためのフラグ
-  const IS_DEBUG = true; // 本番環境ではfalseに設定する
+  const IS_DEBUG = false; // 本番環境ではfalseに設定する
 
   /**
    * デバッグモードのときだけログを出力する

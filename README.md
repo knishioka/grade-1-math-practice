@@ -16,6 +16,28 @@ A fun and interactive math application designed specifically for Grade 1 element
   - **Hard**: More challenging problems for advanced students
   - **Mixed**: Randomly alternates between medium and hard levels
 
+## 📊 Difficulty Settings by Operation
+
+### Addition
+- **Easy**: Numbers 1-10 (e.g., 3 + 5 = ?)
+- **Medium**: Numbers 1-20 (e.g., 15 + 8 = ?)
+- **Hard**: Numbers 10-50 (e.g., 23 + 35 = ?)
+
+### Subtraction
+- **Easy**: Numbers 1-10 (e.g., 8 - 3 = ?)
+- **Medium**: First number 10-20, second number 1-10 (e.g., 18 - 6 = ?)
+- **Hard**: First number 20-100, second number 1-20 (e.g., 65 - 12 = ?)
+
+### Three Number Problems
+- **Easy**: Numbers 1-10, 1-5, 1-5 (e.g., 7 + 3 + 2 = ?)
+- **Medium**: Numbers 5-15, 1-10, 1-10 (e.g., 12 + 6 - 4 = ?)
+- **Hard**: Numbers 10-25, 5-15, 5-15 (e.g., 20 - 8 + 12 = ?)
+
+### Counting
+- **Easy**: Count 5-10 objects
+- **Medium**: Count 10-20 objects
+- **Hard**: Count 15-30 objects
+
 - **Interactive Elements**:
   - On-screen number pad for easy input
   - Answers appear in-place in equations
