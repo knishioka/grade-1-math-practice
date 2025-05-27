@@ -49,7 +49,6 @@
 
 import {
   initGameState,
-  resetGameState,
   updateScore,
   recordIncorrectProblem,
   getUniqueIncorrectProblems,
@@ -67,29 +66,14 @@ import {
   t,
 } from '/src/i18n.js';
 
-import {
-  generateProblemByMode,
-  updateCurrentProblem,
-  generateThreeNumberProblem, // <-- Add direct import for three number problems
-  generateAdditionProblem,
-  generateSubtractionProblem,
-} from '/src/problemGenerator.js';
+import { generateProblemByMode, updateCurrentProblem } from '/src/problemGenerator.js';
 
 import { getRandomDifficulty, formatTime } from '/src/utils.js';
 
-// 開発モード判定のためのフラグ
-// 本番環境ではfalseに設定する
-const IS_DEBUG = false;
-
-/**
- * デバッグモードのときだけログを出力する
- * @param {...any} args - コンソールに出力する引数
- */
-function debug(...args) {
-  if (IS_DEBUG) {
-    console.log(...args);
-  }
-}
+// Application constants
+const GAME_DURATION = 180; // 3 minutes in seconds
+const DEFAULT_GAME_MODE = 'mixed';
+const DEFAULT_DIFFICULTY = 'medium';
 
 // Note: We've removed the global gameStart function and custom event listeners
 // since they were causing duplicate timer execution
@@ -103,8 +87,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // defined functions, not direct manipulation
   let gameState = initGameState();
   // Override initial settings to match UI defaults
-  gameState.gameMode = 'mixed';
-  gameState.difficulty = 'medium';
+  gameState.gameMode = DEFAULT_GAME_MODE;
+  gameState.difficulty = DEFAULT_DIFFICULTY;
 
   // ===================================
   // DOM ELEMENTS
@@ -199,23 +183,17 @@ document.addEventListener('DOMContentLoaded', function () {
   // App startup functions
   // The init function is the entry point of the application
   // Separating initialization from execution improves testability
+  /**
+   * Initialize the application
+   * Sets up UI, language support, and event listeners
+   */
   function init() {
-    debug('Initializing app...');
-    debug('Elements:', elements);
-
     // Initialize language system
     initLanguage();
     initializeLanguageSelector();
 
     // Check all operation buttons
-    debug('Checking all operation buttons at initialization:');
-    elements.operationButtons.forEach(btn => {
-      debug(
-        `Operation button: id=${btn.id}, text="${
-          btn.textContent
-        }", classList=${btn.classList.toString()}`
-      );
-    });
+    // Initialize operation buttons state
 
     // Set initial display
     elements.problem.innerHTML = '<p class="waiting-message">Press Start to begin</p>';
@@ -231,12 +209,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Update active buttons
     updateDefaultActiveButtons();
 
-    // Log active operation button after defaults are set
-    debug(
-      'Active operation button after defaults:',
-      document.querySelector('.operation-btn.active')?.id
-    );
-    debug('Initial game mode:', gameState.gameMode);
+    // Initialize UI state
 
     // Add event listeners
     attachEventListeners();
@@ -247,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Disable interactive elements initially
     setControlsEnabled(false);
 
-    console.log('Initialization complete!');
+    // Initialization complete
   }
 
   function updateDefaultActiveButtons() {
@@ -275,10 +248,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // ===================================
   function initializeLanguageSelector() {
     if (!elements.languageSelector) {
-      console.warn('Language selector element not found in DOM');
       return;
     }
-    console.log('Language selector found, initializing...');
 
     const languages = getAvailableLanguages();
 
@@ -410,44 +381,23 @@ document.addEventListener('DOMContentLoaded', function () {
   // 2. Add to the generateProblemByMode switch statement
   // 3. Ensure consistent problem object structure
 
-  // 開発モード判定のためのフラグ
-  const IS_DEBUG = false; // 本番環境ではfalseに設定する
+  // Debug logging removed for production
 
   /**
-   * デバッグモードのときだけログを出力する
-   * @param {...any} args - コンソールに出力する引数
-   */
-  function debug(...args) {
-    if (IS_DEBUG) {
-      console.log(...args);
-    }
-  }
-
-  /**
-   * 現在のゲームモードと難易度に基づいて新しい問題を生成し表示する
+   * Generate and display a new math problem
    */
   function newProblem() {
     // Ensure gameActive is true when generating a new problem
     if (!gameState.gameActive) {
-      debug('newProblem called but game not active - fixing');
       gameState.gameActive = true;
     }
 
-    // Log current game mode again before generating problem
-    debug(
-      'Current gameMode in newProblem:',
-      gameState.gameMode,
-      'active button:',
-      document.querySelector('.operation-btn.active')?.id
-    );
+    // Ensure game mode consistency
 
     // CRITICAL FIX: Make sure gameMode matches the active button
     // This ensures UI and state are in sync
     const activeButtonId = document.querySelector('.operation-btn.active')?.id;
     if (activeButtonId && gameState.gameMode !== activeButtonId) {
-      debug('CRITICAL ERROR: Game mode mismatch detected!');
-      debug(`Active button is ${activeButtonId} but gameState.gameMode is ${gameState.gameMode}`);
-      debug('Fixing by updating gameState.gameMode to match active button');
       gameState.gameMode = activeButtonId;
     }
 
@@ -465,18 +415,14 @@ document.addEventListener('DOMContentLoaded', function () {
       activeDifficulty = getRandomDifficulty();
     }
 
-    debug('Generating problem with mode:', gameState.gameMode, 'and difficulty:', activeDifficulty);
-
     // Ensure we're actually calling the intended generator
     let problem;
     if (gameState.gameMode === 'threeNumber') {
       try {
         // Force three number problem generation - manually create a problem with 3 numbers
-        debug('Manually creating a three-number problem');
 
         // Lookup difficulty settings
         const settings = difficultySettings.threeNumber[activeDifficulty];
-        debug('Using settings:', settings);
 
         if (!settings) {
           throw new Error('No settings found for threeNumber difficulty: ' + activeDifficulty);
@@ -490,11 +436,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const num3 =
           Math.floor(Math.random() * (settings.max3 - settings.min3 + 1)) + settings.min3;
 
-        debug(`Generated three numbers: ${num1}, ${num2}, ${num3}`);
-
         // Randomly choose a problem type (1-3) just like in problemGenerator.js
         const problemType = Math.floor(Math.random() * 3) + 1;
-        debug('Selected problem type:', problemType);
 
         let question, answer;
 
@@ -539,13 +482,9 @@ document.addEventListener('DOMContentLoaded', function () {
           type: 'threeNumber',
           sourceMode: 'threeNumber',
         };
-
-        debug('Manually created problem:', problem);
       } catch (error) {
-        debug('Error creating three-number problem:', error);
         // IMPORTANT: Since we need 3 numbers, we must NOT fall back to regular generation
         // Instead, create a simple a + b + c problem as a reliable fallback
-        debug('Creating simple a + b + c fallback problem');
 
         const settings = difficultySettings.threeNumber[activeDifficulty] || {
           min1: 1,
@@ -577,7 +516,6 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
       // Normal flow for other modes
       problem = generateProblemByMode(activeDifficulty, difficultySettings, gameState.gameMode);
-      debug('Generated problem via mode:', problem);
     }
 
     // Update the game state with the new problem
@@ -589,15 +527,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Display problem and add debug information to DOM
     elements.problem.innerHTML = gameState.currentProblem.question;
 
-    // Add debug info (only during development)
-    if (IS_DEBUG && gameState.currentProblem.sourceMode) {
-      const debugInfo = document.createElement('div');
-      debugInfo.style.fontSize = '10px';
-      debugInfo.style.color = '#999';
-      debugInfo.style.marginTop = '10px';
-      debugInfo.textContent = `Debug: Generated from ${gameState.currentProblem.sourceMode} mode`;
-      elements.problem.appendChild(debugInfo);
-    }
+    // Problem display complete
   }
 
   // リファクタリング過程の関数重複を削除
@@ -609,9 +539,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Handles both correct and incorrect responses
   // To add new response behaviors, modify these functions
   function checkAnswer() {
-    console.log('checkAnswer called');
     const userAnswer = parseInt(elements.answerDisplay.textContent);
-    console.log('User answer:', userAnswer, 'Correct answer:', gameState.currentProblem.answer);
 
     if (isNaN(userAnswer)) {
       elements.message.textContent = 'Please enter a number!';
@@ -670,11 +598,10 @@ document.addEventListener('DOMContentLoaded', function () {
   // Core game flow functions - starting, ending, and displaying results
   // These functions manage game state transitions
   // When adding new game features, consider their lifecycle integration
+  /**
+   * Start a new game session
+   */
   function startGame() {
-    console.log('startGame called');
-    console.log('Current gameMode before start:', gameState.gameMode);
-    console.log('Active operation button:', document.querySelector('.operation-btn.active')?.id);
-
     // Save current mode and difficulty
     // Make sure to check active button as well in case gameState is out of sync
     const activeButtonId = document.querySelector('.operation-btn.active')?.id;
@@ -682,14 +609,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // If there's a mismatch, trust the UI (active button) over the state
     if (activeButtonId && currentMode !== activeButtonId) {
-      console.log('MISMATCH DETECTED at game start!');
-      console.log(`Active button is ${activeButtonId} but gameState.gameMode is ${currentMode}`);
-      console.log('Using active button ID as the correct mode');
+      // Using active button ID as the correct mode
       currentMode = activeButtonId;
     }
 
     const currentDifficulty = gameState.difficulty;
-    console.log('Saved mode before reset:', currentMode);
 
     // Initialize a fresh game state and manually set gameActive
     // Don't use resetGameState for now to eliminate any potential issues
@@ -699,20 +623,17 @@ document.addEventListener('DOMContentLoaded', function () {
       score: 0,
       incorrectAttempts: 0,
       currentProblemAttempts: 0,
-      timeLeft: 180,
+      timeLeft: GAME_DURATION,
       gameActive: true,
       incorrectProblems: [],
       currentProblem: {},
     };
 
-    console.log('Game state after reset:', gameState);
-    console.log('Game mode after reset:', gameState.gameMode);
-
     // Update UI
     elements.score.textContent = '0';
     elements.incorrect.textContent = '0';
     elements.timer.classList.remove('time-warning');
-    elements.timer.textContent = '3:00';
+    elements.timer.textContent = formatTime(GAME_DURATION);
 
     // Update button state
     elements.startBtn.textContent = 'Running';
@@ -728,19 +649,18 @@ document.addEventListener('DOMContentLoaded', function () {
     elements.check.disabled = true;
 
     // Generate a problem based on the selected mode and difficulty
-    console.log('Generating problem for mode:', gameState.gameMode);
     newProblem();
 
     // Start timer
-    console.log('Starting timer');
     // Set initial time display (don't update time yet)
     elements.timer.textContent = formatTime(gameState.timeLeft);
     // Start interval for timer updates
     gameState.timerInterval = setInterval(updateTimer, 1000);
-
-    console.log('Game started!');
   }
 
+  /**
+   * Reset the game to initial state
+   */
   function resetGame() {
     // Clear any running timer
     if (gameState.timerInterval) {
@@ -752,8 +672,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Reset game state completely with default values
     gameState = initGameState();
     // Override with UI defaults
-    gameState = updateGameMode(gameState, 'mixed');
-    gameState = updateDifficulty(gameState, 'medium');
+    gameState = updateGameMode(gameState, DEFAULT_GAME_MODE);
+    gameState = updateDifficulty(gameState, DEFAULT_DIFFICULTY);
 
     // Ensure gameActive is false to prevent timer from starting
     gameState.gameActive = false;
@@ -807,12 +727,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Additional check to ensure no timer is running
     if (gameState.timerInterval) {
-      console.warn('Timer still exists after reset - clearing again');
       clearInterval(gameState.timerInterval);
       gameState.timerInterval = null;
     }
   }
 
+  /**
+   * End the current game and show results
+   */
   function endGame() {
     // First set game to inactive
     gameState.gameActive = false;
@@ -889,20 +811,14 @@ document.addEventListener('DOMContentLoaded', function () {
   // For implementing different time modes:
   // 1. Modify timeLeft initial value in gameState
   // 2. Adjust updateTimer for different timing behavior
+  /**
+   * Update the game timer and handle time expiration
+   */
   function updateTimer() {
-    console.log(
-      'updateTimer called, gameActive:',
-      gameState.gameActive,
-      'timeLeft:',
-      gameState.timeLeft
-    );
-
     // Only update if the game is active
     if (!gameState.gameActive) {
-      console.log('Game not active, skipping timer update');
       // Clear the interval if game is not active to ensure timer stops
       if (gameState.timerInterval) {
-        console.log('Clearing timer interval because game is not active');
         clearInterval(gameState.timerInterval);
         gameState.timerInterval = null;
       }
@@ -947,21 +863,10 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    // Get the button ID and dump ALL operation buttons to check them
-    console.log('OPERATION CLICK - All operation buttons:');
-    elements.operationButtons.forEach(btn => {
-      console.log(
-        `Button: id=${btn.id}, text="${btn.textContent}", classList=${btn.classList.toString()}`
-      );
-    });
-
-    // Verify this button
-    console.log('Clicked button:', this);
-    console.log('Setting game mode to:', this.id);
+    // Update game state with selected operation mode
 
     // Update game mode using the module function
     gameState = updateGameMode(gameState, this.id);
-    console.log('Updated game state:', gameState);
 
     // Update UI
     updateOperationButtons(this);
@@ -982,13 +887,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Update waiting message
     elements.problem.innerHTML = '<p class="waiting-message">Press Start to begin</p>';
 
-    // Debug: log ALL DOM elements with id=threeNumber
-    console.log('Finding all elements with id=threeNumber:');
-    const threeNumberEls = document.querySelectorAll('#threeNumber');
-    console.log('Found', threeNumberEls.length, 'elements with id=threeNumber:');
-    threeNumberEls.forEach((el, i) => {
-      console.log(`Element ${i}:`, el);
-    });
+    // Reset problem display for new mode
   }
 
   function handleDifficultyButtonClick() {
@@ -1049,15 +948,12 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function updateOperationButtons(activeButton) {
-    console.log('Updating operation buttons, active button id:', activeButton.id);
     elements.operationButtons.forEach(btn => {
       btn.classList.remove('active');
       btn.classList.add('inactive');
-      console.log(`Button ${btn.id} - classList:`, btn.classList.toString());
     });
     activeButton.classList.remove('inactive');
     activeButton.classList.add('active');
-    console.log('After update, active button classList:', activeButton.classList.toString());
   }
 
   function updateDifficultyButtons(activeButton) {

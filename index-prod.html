@@ -3,20 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Grade 1 Math App</title>
+    <title>Grade 1 Math Practice App</title>
+    <meta
+      name="description"
+      content="Interactive math practice app for Grade 1 students. Practice addition, subtraction, and counting with customizable difficulty levels."
+    />
+    <meta
+      name="keywords"
+      content="math practice, grade 1, elementary math, addition, subtraction, counting, education"
+    />
+    <meta name="author" content="Grade 1 Math Practice App" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="container">
       <div class="language-selector">
-        <select id="language-selector">
+        <label for="language-selector" class="sr-only">Language</label>
+        <select id="language-selector" aria-label="Select language">
           <option value="en">English</option>
           <option value="ja">日本語</option>
         </select>
       </div>
       <h1 id="main-title">Grade 1 Math Practice</h1>
       <div class="timer-container">
-        <div id="timer">3:00</div>
+        <div id="timer" aria-label="Game timer">3:00</div>
         <div class="game-controls">
           <button id="start-btn">Start</button>
           <button id="reset-btn">Reset</button>
@@ -31,10 +41,10 @@
         <div><span id="incorrect-label">Incorrect</span>: <span id="incorrect">0</span></div>
       </div>
       <div class="problem-container">
-        <div id="problem"></div>
+        <div id="problem" role="main" aria-live="polite"></div>
         <div class="answer-container">
-          <div id="answer-display"></div>
-          <button id="check">Check</button>
+          <div id="answer-display" aria-label="Your answer" role="textbox"></div>
+          <button id="check" aria-describedby="problem">Check</button>
         </div>
         <div class="number-pad">
           <button class="num-btn">1</button>
