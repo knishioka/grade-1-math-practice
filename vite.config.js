@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { copyFileSync, mkdirSync, existsSync } from 'fs';
 
 export default defineConfig({
+  base: './',
   build: {
     outDir: 'dist',
     rollupOptions: {
