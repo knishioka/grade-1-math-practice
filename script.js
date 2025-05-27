@@ -196,13 +196,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize operation buttons state
 
     // Set initial display
-    elements.problem.innerHTML = '<p class="waiting-message">Press Start to begin</p>';
+    elements.problem.innerHTML = `<p class="waiting-message">${t(
+      'app.gameplay.waitingMessage'
+    )}</p>`;
     if (elements.modeDisplay) {
-      elements.modeDisplay.textContent = 'Mixed';
+      elements.modeDisplay.textContent = t('app.operations.mixed');
       elements.modeDisplay.style.backgroundColor = '#a29bfe'; // Mixed mode color
     }
     if (elements.difficultyDisplay) {
-      elements.difficultyDisplay.textContent = 'Medium';
+      elements.difficultyDisplay.textContent = t('app.difficulty.medium');
       elements.difficultyDisplay.style.backgroundColor = '#0984e3';
     }
 
@@ -328,6 +330,16 @@ document.addEventListener('DOMContentLoaded', function () {
         'app.gameplay.waitingMessage'
       )}</p>`;
     }
+
+    // Update mode and difficulty displays
+    if (elements.modeDisplay && gameState.gameMode) {
+      elements.modeDisplay.textContent = t(`app.operations.${gameState.gameMode}`);
+    }
+    if (elements.difficultyDisplay && gameState.difficulty) {
+      const difficultyKey =
+        gameState.difficulty === 'mixed-difficulty' ? 'mixed' : gameState.difficulty;
+      elements.difficultyDisplay.textContent = t(`app.difficulty.${difficultyKey}`);
+    }
   }
 
   function attachEventListeners() {
@@ -440,7 +452,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const userAnswer = parseInt(elements.answerDisplay.textContent);
 
     if (isNaN(userAnswer)) {
-      elements.message.textContent = 'Please enter a number!';
+      elements.message.textContent = t('app.messages.enterNumber');
       elements.message.className = 'message incorrect';
       return;
     }
@@ -453,7 +465,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function handleCorrectAnswer() {
-    elements.message.textContent = 'Correct! 🎉';
+    elements.message.textContent = t('app.gameplay.correctAnswer');
     elements.message.className = 'message correct';
     gameState = updateScore(gameState);
     elements.score.textContent = gameState.score;
@@ -480,7 +492,7 @@ document.addEventListener('DOMContentLoaded', function () {
       // Show new problem after briefly showing the answer
       setTimeout(newProblem, 1500);
     } else {
-      elements.message.textContent = 'Try again! ✖';
+      elements.message.textContent = t('app.gameplay.incorrectAnswer');
       elements.message.className = 'message incorrect';
       // Flash the problem to make it more noticeable
       elements.problem.classList.add('shake-animation');
@@ -534,7 +546,7 @@ document.addEventListener('DOMContentLoaded', function () {
     elements.timer.textContent = formatTime(GAME_DURATION);
 
     // Update button state
-    elements.startBtn.textContent = 'Running';
+    elements.startBtn.textContent = t('app.buttons.running');
     elements.startBtn.classList.add('disabled');
 
     // Enable inputs
@@ -581,13 +593,15 @@ document.addEventListener('DOMContentLoaded', function () {
     elements.incorrect.textContent = '0';
     elements.timer.textContent = formatTime(gameState.timeLeft);
     elements.timer.classList.remove('time-warning');
-    elements.problem.innerHTML = '<p class="waiting-message">Press Start to begin</p>';
+    elements.problem.innerHTML = `<p class="waiting-message">${t(
+      'app.gameplay.waitingMessage'
+    )}</p>`;
     elements.message.textContent = '';
     elements.message.className = 'message';
     elements.answerDisplay.textContent = '';
 
     // Reset button state
-    elements.startBtn.textContent = 'Start';
+    elements.startBtn.textContent = t('app.buttons.start');
     elements.startBtn.classList.remove('disabled');
 
     // Disable inputs
@@ -598,17 +612,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Update display
     if (elements.modeDisplay) {
-      elements.modeDisplay.textContent = 'Mixed';
+      elements.modeDisplay.textContent = t('app.operations.mixed');
       elements.modeDisplay.style.backgroundColor = '#a29bfe'; // Mixed mode color
     }
     if (elements.difficultyDisplay) {
-      elements.difficultyDisplay.textContent = 'Medium';
+      elements.difficultyDisplay.textContent = t('app.difficulty.medium');
       elements.difficultyDisplay.style.backgroundColor = '#0984e3';
     }
 
     // Show confirmation message
     const resetMessage = document.createElement('div');
-    resetMessage.textContent = 'Game reset. Press Start to begin.';
+    resetMessage.textContent = t('app.messages.resetConfirmation');
     resetMessage.className = 'message';
     resetMessage.style.color = '#0984e3';
     elements.message.innerHTML = '';
@@ -647,7 +661,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setControlsEnabled(false);
 
     // Update UI
-    elements.startBtn.textContent = 'Start Again';
+    elements.startBtn.textContent = t('app.buttons.start');
     elements.startBtn.classList.remove('disabled');
 
     // Display results
@@ -661,16 +675,16 @@ document.addEventListener('DOMContentLoaded', function () {
     // Format difficulty display
     let difficultyDisplay = gameState.difficulty;
     if (gameState.difficulty === 'mixed-difficulty') {
-      difficultyDisplay = 'Mixed';
+      difficultyDisplay = t('app.difficulty.mixed');
     }
 
     // Create results HTML
     let resultHTML = `
-        <h2>Time's Up!</h2>
-        <p>Your final score: ${gameState.score}</p>
-        <p>Incorrect attempts: ${gameState.incorrectAttempts}</p>
-        <p>Accuracy: ${accuracyRate}%</p>
-        <p>Difficulty: ${difficultyDisplay}</p>
+        <h2>${t('app.results.timeUp')}</h2>
+        <p>${t('app.results.finalScore')}: ${gameState.score}</p>
+        <p>${t('app.results.incorrectAttempts')}: ${gameState.incorrectAttempts}</p>
+        <p>${t('app.results.accuracy')}: ${accuracyRate}%</p>
+        <p>${t('app.results.difficulty')}: ${difficultyDisplay}</p>
     `;
 
     // Add incorrect problems if there were any
@@ -685,7 +699,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function createIncorrectProblemsHTML() {
-    let html = '<h3>Problems to Practice:</h3><div class="incorrect-problems">';
+    let html = `<h3>${t('app.results.problemsToPractice')}:</h3><div class="incorrect-problems">`;
 
     // Get unique problems using the module function
     const uniqueProblems = getUniqueIncorrectProblems(gameState);
@@ -783,7 +797,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Update waiting message
-    elements.problem.innerHTML = '<p class="waiting-message">Press Start to begin</p>';
+    elements.problem.innerHTML = `<p class="waiting-message">${t(
+      'app.gameplay.waitingMessage'
+    )}</p>`;
 
     // Reset problem display for new mode
   }
