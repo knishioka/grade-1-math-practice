@@ -60,6 +60,14 @@ import {
 } from '/src/gameState.js';
 
 import {
+  initLanguage,
+  setLanguage,
+  getCurrentLanguage,
+  getAvailableLanguages,
+  t,
+} from '/src/i18n.js';
+
+import {
   generateProblemByMode,
   updateCurrentProblem,
   generateThreeNumberProblem, // <-- Add direct import for three number problems
@@ -129,6 +137,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Number buttons
     numberButtons: document.querySelectorAll('.num-btn'),
     clearButton: document.getElementById('clear-btn'),
+
+    // Language selector
+    languageSelector: document.getElementById('language-selector'),
   };
 
   // Create message elements for locked controls
@@ -192,6 +203,10 @@ document.addEventListener('DOMContentLoaded', function () {
     debug('Initializing app...');
     debug('Elements:', elements);
 
+    // Initialize language system
+    initLanguage();
+    initializeLanguageSelector();
+
     // Check all operation buttons
     debug('Checking all operation buttons at initialization:');
     elements.operationButtons.forEach(btn => {
@@ -253,6 +268,84 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // ===================================
+  // LANGUAGE FUNCTIONS
+  // ===================================
+  function initializeLanguageSelector() {
+    if (!elements.languageSelector) {
+      debug('Language selector not found');
+      return;
+    }
+
+    const languages = getAvailableLanguages();
+
+    // Clear existing options
+    elements.languageSelector.innerHTML = '';
+
+    // Add language options
+    languages.forEach(lang => {
+      const option = document.createElement('option');
+      option.value = lang.code;
+      option.textContent = lang.name;
+      elements.languageSelector.appendChild(option);
+    });
+
+    // Set current language
+    elements.languageSelector.value = getCurrentLanguage();
+
+    // Update UI text
+    updateUIText();
+  }
+
+  function updateUIText() {
+    // Update button texts
+    if (elements.startBtn) elements.startBtn.textContent = t('app.buttons.start');
+    if (elements.resetBtn) elements.resetBtn.textContent = t('app.buttons.reset');
+    if (elements.check) elements.check.textContent = t('app.buttons.check');
+
+    // Update operation button texts
+    const operationTexts = {
+      addition: t('app.operations.addition'),
+      subtraction: t('app.operations.subtraction'),
+      threeNumber: t('app.operations.threeNumber'),
+      mixed: t('app.operations.mixed'),
+      counting: t('app.operations.counting'),
+    };
+
+    elements.operationButtons.forEach(btn => {
+      if (operationTexts[btn.id]) {
+        btn.textContent = operationTexts[btn.id];
+      }
+    });
+
+    // Update difficulty button texts
+    const difficultyTexts = {
+      easy: t('app.difficulty.easy'),
+      medium: t('app.difficulty.medium'),
+      hard: t('app.difficulty.hard'),
+      'mixed-difficulty': t('app.difficulty.mixed'),
+    };
+
+    elements.difficultyButtons.forEach(btn => {
+      if (difficultyTexts[btn.id]) {
+        btn.textContent = difficultyTexts[btn.id];
+      }
+    });
+
+    // Update difficulty label
+    const difficultyLabel = document.querySelector('.difficulty-container p');
+    if (difficultyLabel) {
+      difficultyLabel.textContent = t('app.difficulty.label');
+    }
+
+    // Update waiting message if game is not active
+    if (!gameState.gameActive) {
+      elements.problem.innerHTML = `<p class="waiting-message">${t(
+        'app.gameplay.waitingMessage'
+      )}</p>`;
+    }
+  }
+
   function attachEventListeners() {
     // Game controls
     elements.startBtn.addEventListener('click', startGame);
@@ -283,6 +376,14 @@ document.addEventListener('DOMContentLoaded', function () {
       elements.clearButton.addEventListener('click', () => {
         elements.answerDisplay.textContent = '';
         checkInputValue();
+      });
+    }
+
+    // Language selector
+    if (elements.languageSelector) {
+      elements.languageSelector.addEventListener('change', e => {
+        setLanguage(e.target.value);
+        updateUIText();
       });
     }
   }
