@@ -14,12 +14,12 @@ import jaTranslations from '../locales/ja.json';
 export const AVAILABLE_LANGUAGES = {
   en: {
     name: 'English',
-    translations: enTranslations
+    translations: enTranslations,
   },
   ja: {
     name: '日本語',
-    translations: jaTranslations
-  }
+    translations: jaTranslations,
+  },
   // 他の言語も必要に応じて追加
 };
 
@@ -58,7 +58,7 @@ export function getCurrentLanguage() {
 export function t(key, params = {}) {
   const translations = AVAILABLE_LANGUAGES[currentLanguage].translations;
   const keys = key.split('.');
-  
+
   // 階層をたどって翻訳を取得
   let value = translations;
   for (const k of keys) {
@@ -70,14 +70,14 @@ export function t(key, params = {}) {
       return key;
     }
   }
-  
+
   // パラメータがある場合は置換
   if (typeof value === 'string' && Object.keys(params).length > 0) {
     return value.replace(/\{(\w+)\}/g, (_, paramKey) => {
       return params[paramKey] !== undefined ? params[paramKey] : `{${paramKey}}`;
     });
   }
-  
+
   return value;
 }
 
@@ -88,7 +88,7 @@ export function t(key, params = {}) {
 export function getAvailableLanguages() {
   return Object.entries(AVAILABLE_LANGUAGES).map(([code, data]) => ({
     code,
-    name: data.name
+    name: data.name,
   }));
 }
 

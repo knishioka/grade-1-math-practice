@@ -42,23 +42,6 @@ export function formatTime(seconds) {
 }
 
 /**
- * Create a debounced version of a function
- * Will only execute after delay has passed since last call
- * @param {Function} func - Function to debounce
- * @param {number} delay - Delay in milliseconds
- * @return {Function} Debounced function
- */
-export function debounce(func, delay) {
-  let timeoutId;
-  return function (...args) {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-      func.apply(this, args);
-    }, delay);
-  };
-}
-
-/**
  * Check if a value is a valid number
  * @param {*} value - Value to check
  * @return {boolean} True if value is a valid number, false otherwise
@@ -66,12 +49,4 @@ export function debounce(func, delay) {
 export function isValidNumber(value) {
   const parsed = parseInt(value, 10);
   return !isNaN(parsed) && isFinite(parsed);
-}
-
-/**
- * Create a unique ID
- * @return {string} Unique ID
- */
-export function generateId() {
-  return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
