@@ -1,5 +1,7 @@
 # Grade 1 Math Practice App
 
+🚀 **[Try the App Live!](https://knishioka.github.io/grade-1-math-practice/)**
+
 A fun and interactive math application designed specifically for Grade 1 elementary students. This app helps young learners practice basic arithmetic skills in a colorful, engaging environment.
 
 ## 🌟 Features
@@ -218,6 +220,21 @@ The test suite is organized into the following categories:
 - Line coverage: >90%
 - Function coverage: 100%
 - Branch coverage: >85%
+
+## 🚀 Live Demo & Deployment
+
+The app is automatically deployed to GitHub Pages and available at:
+**https://knishioka.github.io/grade-1-math-practice/**
+
+### Automated Deployment
+- **GitHub Actions** automatically builds and deploys the app on every push to the main branch
+- **ES6 modules** are bundled using Rollup for browser compatibility
+- **Tests and linting** run automatically before deployment
+- **Zero downtime** deployments with GitHub Pages
+
+### Development vs Production
+- **Development**: Uses ES6 modules directly (`index.html` + `script.js`)
+- **Production**: Uses bundled JavaScript (`dist/index.html` + `dist/script.js`)
 
 ## 📄 License
 
