@@ -226,15 +226,95 @@ The test suite is organized into the following categories:
 The app is automatically deployed to GitHub Pages and available at:
 **https://knishioka.github.io/grade-1-math-practice/**
 
-### Automated Deployment
-- **GitHub Actions** automatically builds and deploys the app on every push to the main branch
-- **ES6 modules** are bundled using Rollup for browser compatibility
-- **Tests and linting** run automatically before deployment
-- **Zero downtime** deployments with GitHub Pages
+### How the App is Released to GitHub Pages
 
-### Development vs Production
-- **Development**: Uses ES6 modules directly (`index.html` + `script.js`)
-- **Production**: Uses bundled JavaScript (`dist/index.html` + `dist/script.js`)
+This application uses a modern CI/CD pipeline for automatic deployment:
+
+#### 1. **GitHub Actions Workflow**
+The deployment process is defined in `.github/workflows/deploy.yml`:
+
+```yaml
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test
+      - name: Build production app
+        run: npm run build
+      - name: Upload build artifacts
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+```
+
+#### 2. **Build Process**
+The production build uses **Vite** (replacing Rollup) for modern ES6 module bundling:
+
+- **Vite Configuration** (`vite.config.js`):
+  - Bundles ES6 modules for browser compatibility
+  - Handles relative paths for GitHub Pages subdirectory hosting
+  - Copies locale files and renames HTML files
+  - Optimizes assets and generates production-ready code
+
+#### 3. **Multilingual Support**
+The app includes internationalization features:
+- Language selector in the top-right corner
+- Dynamic translation between English and Japanese
+- Locale files (`locales/en.json`, `locales/ja.json`) copied to production
+
+#### 4. **Development vs Production**
+
+| Environment | Files | Module System | Build Tool |
+|-------------|-------|---------------|------------|
+| **Development** | `index.html` + `script.js` | ES6 modules | None (direct loading) |
+| **Production** | `dist/index.html` + `dist/script.js` | Bundled | Vite |
+
+#### 5. **Deployment Trigger**
+- **Automatic**: Every push to the `main` branch triggers deployment
+- **Quality Gates**: Tests and linting must pass before deployment
+- **Zero Downtime**: GitHub Pages serves the new version immediately after build
+
+#### 6. **Key Features of the Deployment**
+- ✅ **Automated Testing**: Jest test suite runs before deployment
+- ✅ **Code Quality**: ESLint and Prettier ensure code standards
+- ✅ **Asset Optimization**: CSS and JavaScript are minified
+- ✅ **Browser Compatibility**: ES6 modules bundled for older browsers
+- ✅ **Multilingual Ready**: Supports English and Japanese interfaces
+- ✅ **Mobile Responsive**: Optimized for all device sizes
+
+#### 7. **Manual Deployment (if needed)**
+```bash
+# Build the production version locally
+npm run build
+
+# The dist/ folder contains the deployable files
+# GitHub Actions handles this automatically on push
+```
 
 ## 📄 License
 
