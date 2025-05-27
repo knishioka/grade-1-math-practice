@@ -9,7 +9,7 @@ import {
   generateThreeNumberProblem,
   generateCountingProblem,
   generateProblemByMode,
-  updateCurrentProblem
+  updateCurrentProblem,
 } from '../src/problemGenerator';
 
 // Mock difficulty settings
@@ -105,14 +105,14 @@ describe('Problem Generator Functions', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          originalQuestion: expect.stringMatching(/^\d+ [\+\-] \d+ [\+\-] \d+ = \?$/),
-          question: expect.stringMatching(/^\d+ [\+\-] \d+ [\+\-] \d+ = \?$/),
+          originalQuestion: expect.stringMatching(/^\d+ [+-] \d+ [+-] \d+ = \?$/),
+          question: expect.stringMatching(/^\d+ [+-] \d+ [+-] \d+ = \?$/),
           answer: expect.any(Number),
         })
       );
 
       // Verify that the answer is correct
-      const match = result.question.match(/^(\d+) ([\+\-]) (\d+) ([\+\-]) (\d+) = \?$/);
+      const match = result.question.match(/^(\d+) ([+-]) (\d+) ([+-]) (\d+) = \?$/);
       const num1 = parseInt(match[1]);
       const op1 = match[2];
       const num2 = parseInt(match[3]);
@@ -129,25 +129,25 @@ describe('Problem Generator Functions', () => {
       }
 
       expect(result.answer).toBe(expectedAnswer);
-      
+
       // Result should never be negative
       expect(result.answer).toBeGreaterThanOrEqual(0);
     });
-    
+
     test('ensures all operations maintain non-negative results', () => {
       // Test 50 problems to verify no negative intermediate results
       for (let i = 0; i < 50; i++) {
         const result = generateThreeNumberProblem('medium', mockDifficultySettings);
-        const match = result.question.match(/^(\d+) ([\+\-]) (\d+) ([\+\-]) (\d+) = \?$/);
+        const match = result.question.match(/^(\d+) ([+-]) (\d+) ([+-]) (\d+) = \?$/);
         const num1 = parseInt(match[1]);
         const op1 = match[2];
         const num2 = parseInt(match[3]);
-        
+
         // If first operation is subtraction, num1 must be >= num2
         if (op1 === '-') {
           expect(num1).toBeGreaterThanOrEqual(num2);
         }
-        
+
         // Final result should always be non-negative
         expect(result.answer).toBeGreaterThanOrEqual(0);
       }
@@ -183,37 +183,25 @@ describe('Problem Generator Functions', () => {
 
       // Test addition mode
       generateProblemByMode('easy', mockDifficultySettings, 'addition', mockGenerators);
-      expect(mockGenerators.addition).toHaveBeenCalledWith(
-        'easy',
-        mockDifficultySettings
-      );
+      expect(mockGenerators.addition).toHaveBeenCalledWith('easy', mockDifficultySettings);
 
       // Test subtraction mode
       generateProblemByMode('easy', mockDifficultySettings, 'subtraction', mockGenerators);
-      expect(mockGenerators.subtraction).toHaveBeenCalledWith(
-        'easy',
-        mockDifficultySettings
-      );
+      expect(mockGenerators.subtraction).toHaveBeenCalledWith('easy', mockDifficultySettings);
 
       // Test threeNumber mode
       generateProblemByMode('easy', mockDifficultySettings, 'threeNumber', mockGenerators);
-      expect(mockGenerators.threeNumber).toHaveBeenCalledWith(
-        'easy',
-        mockDifficultySettings
-      );
+      expect(mockGenerators.threeNumber).toHaveBeenCalledWith('easy', mockDifficultySettings);
 
       // Test counting mode
       generateProblemByMode('easy', mockDifficultySettings, 'counting', mockGenerators);
-      expect(mockGenerators.counting).toHaveBeenCalledWith(
-        'easy',
-        mockDifficultySettings
-      );
+      expect(mockGenerators.counting).toHaveBeenCalledWith('easy', mockDifficultySettings);
     });
 
     test('handles mixed mode by including threeNumber problems', () => {
       // Override Math.random to test all possibilities
       const originalRandom = Math.random;
-      
+
       try {
         // Test a large sample to ensure we hit all 3 operation types
         const operations = {
@@ -221,20 +209,24 @@ describe('Problem Generator Functions', () => {
           subtraction: 0,
           threeNumber: 0,
         };
-        
+
         for (let i = 0; i < 300; i++) {
           const mixedResult = generateProblemByMode('easy', mockDifficultySettings, 'mixed');
-          
+
           // Count occurrences of each problem type
-          if (mixedResult.question.includes('+') && !mixedResult.question.match(/\d+ \+ \d+ \+ \d+/) && !mixedResult.question.match(/\d+ \+ \d+ \- \d+/)) {
+          if (
+            mixedResult.question.includes('+') &&
+            !mixedResult.question.match(/\d+ \+ \d+ \+ \d+/) &&
+            !mixedResult.question.match(/\d+ \+ \d+ - \d+/)
+          ) {
             operations.addition++;
-          } else if (mixedResult.question.match(/\d+ \- \d+ = \?$/)) {
+          } else if (mixedResult.question.match(/\d+ - \d+ = \?$/)) {
             operations.subtraction++;
-          } else if (mixedResult.question.match(/\d+ [\+\-] \d+ [\+\-] \d+/)) {
+          } else if (mixedResult.question.match(/\d+ [+-] \d+ [+-] \d+/)) {
             operations.threeNumber++;
           }
         }
-        
+
         // We should have some of each type
         expect(operations.addition).toBeGreaterThan(0);
         expect(operations.subtraction).toBeGreaterThan(0);
@@ -251,20 +243,20 @@ describe('Problem Generator Functions', () => {
       const gameState = {
         currentProblem: {},
         currentProblemAttempts: 5,
-        otherProperty: 'value'
+        otherProperty: 'value',
       };
-      
+
       const problem = {
         question: '1 + 1 = ?',
-        answer: 2
+        answer: 2,
       };
-      
+
       const result = updateCurrentProblem(gameState, problem);
-      
+
       expect(result).toEqual({
         currentProblem: problem,
         currentProblemAttempts: 0,
-        otherProperty: 'value'
+        otherProperty: 'value',
       });
     });
   });
