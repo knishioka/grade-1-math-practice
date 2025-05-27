@@ -273,9 +273,10 @@ document.addEventListener('DOMContentLoaded', function () {
   // ===================================
   function initializeLanguageSelector() {
     if (!elements.languageSelector) {
-      debug('Language selector not found');
+      console.warn('Language selector element not found in DOM');
       return;
     }
+    console.log('Language selector found, initializing...');
 
     const languages = getAvailableLanguages();
 
