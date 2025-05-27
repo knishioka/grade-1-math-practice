@@ -221,6 +221,7 @@ document.addEventListener('DOMContentLoaded', function () {
     elements.problem.innerHTML = '<p class="waiting-message">Press Start to begin</p>';
     if (elements.modeDisplay) {
       elements.modeDisplay.textContent = 'Mixed';
+      elements.modeDisplay.style.backgroundColor = '#a29bfe'; // Mixed mode color
     }
     if (elements.difficultyDisplay) {
       elements.difficultyDisplay.textContent = 'Medium';
@@ -780,6 +781,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Update display
     if (elements.modeDisplay) {
       elements.modeDisplay.textContent = 'Mixed';
+      elements.modeDisplay.style.backgroundColor = '#a29bfe'; // Mixed mode color
     }
     if (elements.difficultyDisplay) {
       elements.difficultyDisplay.textContent = 'Medium';
@@ -965,6 +967,16 @@ document.addEventListener('DOMContentLoaded', function () {
     updateOperationButtons(this);
     if (elements.modeDisplay) {
       elements.modeDisplay.textContent = this.textContent;
+      // Set mode display color to match selected button
+      const modeColors = {
+        addition: '#ff6b6b',
+        subtraction: '#1dd1a1',
+        mixed: '#a29bfe',
+        counting: '#feca57',
+        threeNumber: '#4b7bec', // default button color
+      };
+      const selectedColor = modeColors[this.id] || '#4b7bec';
+      elements.modeDisplay.style.backgroundColor = selectedColor;
     }
 
     // Update waiting message

@@ -78,9 +78,7 @@ h1 {
   text-align: center;
 }
 
-#current-mode-display {
-  background-color: #e84393;
-}
+/* Mode display color is set dynamically by JavaScript */
 
 #timer {
   font-size: 28px;
