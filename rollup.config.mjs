@@ -1,4 +1,5 @@
 import { nodeResolve } from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import { copyFileSync, mkdirSync, existsSync } from 'fs';
 
@@ -9,14 +10,17 @@ export default {
     format: 'iife',
     name: 'MathApp'
   },
+  external: [],
   plugins: [
     json({
       compact: true
     }),
     nodeResolve({
       preferBuiltins: false,
-      browser: true
+      browser: true,
+      exportConditions: ['default', 'module', 'import']
     }),
+    commonjs(),
     {
       name: 'copy-assets',
       generateBundle() {
