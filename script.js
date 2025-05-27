@@ -224,6 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (elements.difficultyDisplay) {
       elements.difficultyDisplay.textContent = 'Medium';
+      elements.difficultyDisplay.style.backgroundColor = '#0984e3';
     }
 
     // Update active buttons
@@ -782,6 +783,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (elements.difficultyDisplay) {
       elements.difficultyDisplay.textContent = 'Medium';
+      elements.difficultyDisplay.style.backgroundColor = '#0984e3';
     }
 
     // Show confirmation message
@@ -837,7 +839,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Format difficulty display
     let difficultyDisplay = gameState.difficulty;
     if (gameState.difficulty === 'mixed-difficulty') {
-      difficultyDisplay = 'Mixed (Medium-Hard)';
+      difficultyDisplay = 'Mixed';
     }
 
     // Create results HTML
@@ -991,7 +993,12 @@ document.addEventListener('DOMContentLoaded', function () {
     if (elements.difficultyDisplay) {
       let displayText = this.textContent;
       if (gameState.difficulty === 'mixed-difficulty') {
-        displayText = 'Mixed (Medium-Hard)';
+        displayText = 'Mixed';
+        // Set mixed difficulty color to match button
+        elements.difficultyDisplay.style.backgroundColor = '#e84393';
+      } else {
+        // Reset to default color for other difficulties
+        elements.difficultyDisplay.style.backgroundColor = '#0984e3';
       }
       elements.difficultyDisplay.textContent = displayText;
     }
