@@ -298,6 +298,16 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function updateUIText() {
+    // Update title
+    const mainTitle = document.getElementById('main-title');
+    if (mainTitle) mainTitle.textContent = t('app.title');
+
+    // Update score labels
+    const scoreLabel = document.getElementById('score-label');
+    const incorrectLabel = document.getElementById('incorrect-label');
+    if (scoreLabel) scoreLabel.textContent = t('app.gameplay.score');
+    if (incorrectLabel) incorrectLabel.textContent = t('app.gameplay.incorrect');
+
     // Update button texts
     if (elements.startBtn) elements.startBtn.textContent = t('app.buttons.start');
     if (elements.resetBtn) elements.resetBtn.textContent = t('app.buttons.reset');
